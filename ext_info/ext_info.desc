@@ -1,0 +1,7 @@
+[Module]
+Description=Extension user description
+Description[pl]=Rozszerzone informacje o kontaktcie
+Author=NKG
+Provides=exstension_description
+Conflicts=
+Dependencies=hints
