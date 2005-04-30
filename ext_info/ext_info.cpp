@@ -9,29 +9,37 @@
 
 /*
     Author:
-    Micha³ (NKG) Nied¼wiecki
+    Micha³ (D¼wiedziu) Nied¼wiecki
     nkg@poczta.onet.pl
     http://nkg.republika.pl/
 
     ChangeLog:
 
-    [v1.3 ]
-	* Dostosowano do zmian w aktualnej wersji Kadu CVS
+        [v1.3.1 ]
+            * Poprawiony b³±d w t³umaczeniu (dziêki tomee)
+            * Poprawiono b³±d, który wystêpowa³ gdy skasowano plik ze zdjêciem
+            * Je¶li osoba ma jutro imieniny (odpowiednio urodziny) to
+              wy¶wietlana jest informacja, ¿e "... ma jutro imieniny", a nie
+              "... ma imieniny za 1 dni"
 
-    [v1.2 ]
-        * Zmieniono nazwê na ExtInfo (ext_info)
-        * Naniesiono kilka drobnych poprawek
+        [v1.3 ]
+            * Dostosowano do zmian w aktualnej wersji Kadu CVS
+
+        [v1.2 ]
+            * Zmieniono nazwê na ExtInfo (ext_info)
+            * Naniesiono kilka drobnych poprawek
 
         [v1.1 ]
-            * Ikona w menu i w oknie konfiguracji
-            * Import i eksport danych do pliku
+            + Ikona w menu i w oknie konfiguracji
+            + Import i eksport danych do pliku
 
         [v1.0 ]
             * Nikt nie zg³asza³ ¿adnych problemów wiêc wydajê finaln± wersjê :)
 
         [v1.0 rc1]
             * Naprawiony b³±d przy skalowaniu zdjêcia
-            * Przed za³adowaniem obrazka sprawdza czy plik istnieje, ¿eby nie dawa³ komunikatu o b³êdzie na konsole
+            * Przed za³adowaniem obrazka sprawdza czy plik istnieje, ¿eby nie
+              dawa³ komunikatu o b³êdzie na konsole
 
         [v1.0 beta2]
             * Naprawiony powa¿ny b³±d przy dodawaniu i usuwaniu kontaktów
@@ -51,7 +59,7 @@
 #else
 #include "../hints/hint_manager.h"
 #endif
-#define MODULE_EXTINFO_VERSION 1.2
+#define MODULE_EXTINFO_VERSION 1.3.1
 
 ExtInfo* extinfo;
 
@@ -238,20 +246,36 @@ void ExtInfo::checkAnniversary()
 QString ExtInfo::formatNameDayInfo(const QString& name, int days)
 {
     QString str;
-    if (days)
-        str = name + tr(" have name day for ") + QString::number(days) + tr(" days");
+    if (days > 1)
+    {
+        str = name + tr(" has name-day in ") + QString::number(days) + tr(" days");
+    }
+    else if (days == 1)
+    {
+        str = name + tr(" has name-day tomorrow");
+    }
     else
-        str = name + tr(" have name day");
+    {
+        str = name + tr(" has name-day");
+    }
     return str;
 }
 
 QString ExtInfo::formatBirthdayInfo(const QString& name, int days)
 {
     QString str;
-    if (days)
-        str = name + tr(" have birthday for ") + QString::number(days) + tr(" days");
+    if (days > 1)
+    {
+        str = name + tr(" has birthday in ") + QString::number(days) + tr(" days");
+    }
+    else if (days == 1)
+    {
+        str = name + tr(" has birthday tomorrow");
+    }
     else
-        str = name + tr(" have birthday");
+    {
+        str = name + tr(" has birthday");
+    }
     return str;
 }
 
@@ -285,14 +309,14 @@ void ExtInfo::onExport()
     if (frmextinfo.isShown())
     {
         frmextinfo.setFocus();
-        MessageBox::wrn(tr("First you must close ExtInfo window"));
+        MessageBox::wrn(tr("First you must close ext_info window"));
         kdebugf2();
         return;
     }
     for(;;)
     {
         QString filename = QFileDialog::getSaveFileName(ggPath("RExInfo.dat"),
-            tr("RExInfo/ExtInfo 1.x files") + QString(" (RExInfo.dat; rexinfo.dat);;") +
+            tr("RExInfo/ext_info 1.x files") + QString(" (RExInfo.dat; rexinfo.dat);;") +
             tr("All files") + QString(" (*)"));
         if (filename.length())
         {
@@ -315,12 +339,12 @@ void ExtInfo::onImport()
     if (frmextinfo.isShown())
     {
         frmextinfo.setFocus();
-        MessageBox::wrn(tr("First you must close ExtInfo window"));
+        MessageBox::wrn(tr("First you must close ext_info window"));
         kdebugf2();
         return;
     }
     QString filename = QFileDialog::getOpenFileName(ggPath("RExInfo.dat"),
-        tr("RExInfo/ExtInfo 1.x files") + QString(" (RExInfo.dat; rexinfo.dat);;") +
+        tr("RExInfo/ext_info 1.x files") + QString(" (RExInfo.dat; rexinfo.dat);;") +
         tr("All files") + QString(" (*)"));
     if (filename.length())
     {

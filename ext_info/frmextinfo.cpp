@@ -568,7 +568,7 @@ void frmExtInfo::testFormatNameday()
 
 void frmExtInfo::showAbout()
 {
-    QMessageBox::about (this, "ExtInfo", QString("ExtInfo v.") + QString(EXTINFO_VERSION) + QString(" GPL\nCopyright (C) by NKG 2004\nnkg@poczta.onet.pl\nhttp://nkg.republika.pl/\n\n") + tr("This module is compatible with RExInfo plugin from PowerGG.") + "\nCopyright (C) by RaV\nhttp://www.rexinfo.prv.pl/");
+    QMessageBox::about (this, "ExtInfo", QString("ExtInfo v.") + QString(EXTINFO_VERSION) + QString(" GPL\nCopyright (C) by ") + tr("Dzwiedziu")  + QString(" 2005\nnkg@poczta.onet.pl\nhttp://nkg.republika.pl/\n\n") + tr("This module is compatible with RExInfo plugin from PowerGG.") + "\nCopyright (C) by RaV\nhttp://www.rexinfo.prv.pl/");
 }
 
 
@@ -663,6 +663,7 @@ void frmExtInfo::loadImage( const QString & image )
     {
         wPhoto->hide();
         plPhoto->clear();
+        photo_path = "";
     }
     tlPathImage->setText(tr ("Path image: ") + image);
     kdebugf2();

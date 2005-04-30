@@ -1,12 +1,12 @@
 #ifndef EXTINFOITEM_H
 #define EXTINFOITEM_H
 
-#define EXTINFO_VERSION "1.2"
+#define EXTINFO_VERSION "1.3.1"
 
 #include <qobject.h>
 #include <qstring.h>
 /**
-@author Micha³ "NKG" Nied¼wiecki
+@author Micha³ "D¼wiedziu" Nied¼wiecki
 */
 
 class ExtListElement

@@ -33,23 +33,35 @@
 <context>
     <name>ExtInfo</name>
     <message>
-        <source> have name day for </source>
+        <source> has name-day in </source>
         <translation> ma imieniny za </translation>
+    </message>
+    <message>
+        <source> has name-day tomorrow</source>
+        <translation> ma jutro imieniny</translation>
     </message>
     <message>
         <source> days</source>
         <translation> dni</translation>
     </message>
     <message>
-        <source> have name day</source>
+        <source> day</source>
+        <translation> dzień</translation>
+    </message>
+    <message>
+        <source> has name-day</source>
         <translation> ma dziś imieniny</translation>
     </message>
     <message>
-        <source> have birthday for </source>
+        <source> has birthday in </source>
         <translation> ma urodziny za </translation>
     </message>
     <message>
-        <source> have birthday</source>
+        <source> has birthday tomorrow</source>
+        <translation> ma jutro urodziny</translation>
+    </message>
+    <message>
+        <source> has birthday</source>
         <translation> ma dziś urodziny</translation>
     </message>
     <message>
@@ -65,12 +77,12 @@
         <translation>Wiem o imieninach :)</translation>
     </message>
     <message>
-        <source>First you must close ExtInfo window</source>
-        <translation>Najpierw musisz zamknąć okno ExtInfo</translation>
+        <source>First you must close ext_info window</source>
+        <translation>Najpierw musisz zamknąć okno ext_info</translation>
     </message>
     <message>
-        <source>RExInfo/ExtInfo 1.x files</source>
-        <translation>Pliki RExInfo/ExtInfo 1.x</translation>
+        <source>RExInfo/ext_info 1.x files</source>
+        <translation>Pliki RExInfo/ext_info 1.x</translation>
     </message>
     <message>
         <source>This file are exists. Overwrite this file?</source>
@@ -282,6 +294,10 @@
     <message>
         <source>All files</source>
         <translation>Wszystkie pliki</translation>
+    </message>
+    <message>
+        <source>Dzwiedziu</source>
+        <translation>Dźwiedziu</translation>
     </message>
 </context>
 </TS>
