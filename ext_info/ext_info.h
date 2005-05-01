@@ -13,21 +13,25 @@ class ExtInfo : public QObject
         ExtInfo();
         ~ExtInfo();
     private:
-        frmExtInfo frmextinfo;
+        frmExtInfo *frmextinfo;
         ExtList extlist;
         QTimer timer;
         bool menuBirthday;
         bool menuNameDay;
-        UserListElement user;
+        UserListElement user;   // User, ktorego popup menu sie wyswietli³o
 
         QString formatBirthdayInfo(const QString& name, int days);
         QString formatNameDayInfo(const QString& name, int days);
 
+        bool UpdateUser();
+
     private slots:
         void acceptChanges( const ExtList&);
+        void closeWindow();
         void checkAnniversary();
     public slots:
         void showExtInfo();
+        void showExtInfo(const QString& section);
         void onPopupMenuCreate();
         void userDataChanged(const UserListElement* const oldData, const UserListElement* const newData,bool);
         void knowNameDay();

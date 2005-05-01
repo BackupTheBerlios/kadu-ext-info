@@ -20,7 +20,7 @@
 #include <qfile.h>
 
 frmExtInfo::frmExtInfo( QWidget* parent, const char* name, bool modal, WFlags fl )
-    : QDialog( parent, name, modal, fl )
+    : QDialog( parent, name, modal, fl ),clicked(QMessageBox::NoButton)
 {
     kdebugf();
     if ( !name )
@@ -336,7 +336,7 @@ frmExtInfo::frmExtInfo( QWidget* parent, const char* name, bool modal, WFlags fl
     clearWState( WState_Polished );
 
     // signals and slots connections
-    connect( pbCancel, SIGNAL( clicked() ), this, SLOT( close() ) );
+    connect( pbCancel, SIGNAL( clicked() ), this, SLOT(clockedCancel()) );
     connect( cbSection, SIGNAL( activated(const QString&) ), this, SLOT( cbChangeSection(const QString&) ) );
     connect( teMemo, SIGNAL( textChanged() ), this, SLOT( memoCharsUpdate() ) );
     connect( leNameDay, SIGNAL( lostFocus() ), this, SLOT( testFormatNameday() ) );
@@ -408,6 +408,46 @@ frmExtInfo::~frmExtInfo()
     kdebugf();
     destroy();
     kdebugf2();
+}
+
+void frmExtInfo::clockedCancel()
+{
+    clicked = QMessageBox::Cancel;
+    close();
+}
+
+void frmExtInfo::closeEvent ( QCloseEvent * e )
+{
+    QString modifieds;
+    if (clicked == QMessageBox::NoButton)
+        updateSection();
+    if (clicked != QMessageBox::Ok)
+    {
+        for (ExtList::iterator i = extlist.begin(); i != extlist.end(); i++)
+        {
+            if ((*i).modified)
+            {
+                modifieds += i.key();
+                modifieds += "\n";
+            }
+        }
+        if (modifieds.length())
+        {
+            int ret = QMessageBox::question(this, tr("Extension info"), tr("This section have modified:") + QString("\n\n") + modifieds + QString("\n") + tr("Do you want to save changes?"),QMessageBox::Yes ,QMessageBox::No,QMessageBox::Cancel);
+            if (ret == QMessageBox::Yes)
+            {
+                clickedOk();
+            }
+            else if (ret == QMessageBox::Cancel)
+            {
+                e->ignore();
+                clicked = QMessageBox::NoButton;
+                return;
+            }
+        }
+    }
+    e->accept();
+    emit(closeWindow());
 }
 
 void frmExtInfo::languageChange()
@@ -502,6 +542,7 @@ void frmExtInfo::updateSection()
     kdebugf();
     if (currentSection == "")
         return;
+    ExtListElement old = extlist[currentSection];
     extlist[currentSection].nickname = leNickname->text();
     extlist[currentSection].last_name = leLastName->text();
     extlist[currentSection].first_name = leFirstName->text();
@@ -523,6 +564,10 @@ void frmExtInfo::updateSection()
     extlist[currentSection].memo = teMemo->text();
     extlist[currentSection].photo_path = photo_path;
     extlist[currentSection].photo_scaled = cbScaled->isChecked();
+    if (old != extlist[currentSection])
+    {
+        extlist[currentSection].modified = true;
+    }
     kdebugf2();
 }
 
@@ -575,6 +620,7 @@ void frmExtInfo::showAbout()
 void frmExtInfo::clickedOk()
 {
     kdebugf();
+    clicked = QMessageBox::Ok;
     updateSection();
     emit(acceptChanges(extlist));
     close();
@@ -591,7 +637,10 @@ void frmExtInfo::show(const ExtList &src, const QString & sectionName )
         currentSection = "";
         extlist = src;
         for (ExtList::iterator i = extlist.begin(); i != extlist.end(); i++)
+        {
             cbSection->insertItem(i.key());
+            (*i).modified = false;
+        }
     }
     else
         updateSection();

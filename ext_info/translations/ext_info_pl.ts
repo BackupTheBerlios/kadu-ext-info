@@ -101,7 +101,7 @@
     <name>frmExtInfo</name>
     <message>
         <source>Extension info</source>
-        <translation>Rozrzerzone informacje</translation>
+        <translation>Rozszerzone informacje</translation>
     </message>
     <message>
         <source>Format: dd.mm.yyyy</source>
@@ -185,7 +185,7 @@
     </message>
     <message>
         <source>Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Główne</translation>
     </message>
     <message>
         <source>Second GG:</source>
@@ -221,7 +221,7 @@
     </message>
     <message>
         <source>Net</source>
-        <translation type="unfinished"></translation>
+        <translation>Internet</translation>
     </message>
     <message>
         <source>0 chars</source>
@@ -229,7 +229,7 @@
     </message>
     <message>
         <source>Memo</source>
-        <translation type="unfinished"></translation>
+        <translation>Notatki</translation>
     </message>
     <message>
         <source>Path image:</source>
@@ -249,7 +249,7 @@
     </message>
     <message>
         <source>Photo</source>
-        <translation type="unfinished"></translation>
+        <translation>Zdjęcie</translation>
     </message>
     <message>
         <source>OK</source>
@@ -298,6 +298,14 @@
     <message>
         <source>Dzwiedziu</source>
         <translation>Dźwiedziu</translation>
+    </message>
+    <message>
+        <source>This section have modified:</source>
+        <translation>Te sekcje zostały zmienione:</translation>
+    </message>
+    <message>
+        <source>Do you want to save changes?</source>
+        <translation>Czy chcesz zachować zmiany?</translation>
     </message>
 </context>
 </TS>

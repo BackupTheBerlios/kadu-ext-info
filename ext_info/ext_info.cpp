@@ -11,9 +11,15 @@
     Author:
     Micha³ (D¼wiedziu) Nied¼wiecki
     nkg@poczta.onet.pl
-    http://nkg.republika.pl/
+    http://kadu-ext-info.berlios.de/
 
     ChangeLog:
+
+        [v1.4 ]
+            + Je¶li w oknie rozszerzonych informacji zostan± dokonane zmiany
+              i je¶li u¿ytkownik kliknie na "Anuluj" lub spróbuje zamkn±æ okno
+              klikaj±c na "X" zostanie zapytany, czy zachowaæ zmiany.zmodyfikowane
+            * Spolszczone nazwy zak³adek
 
         [v1.3.1 ]
             * Poprawiony b³±d w t³umaczeniu (dziêki tomee)
@@ -59,7 +65,7 @@
 #else
 #include "../hints/hint_manager.h"
 #endif
-#define MODULE_EXTINFO_VERSION 1.3.1
+#define MODULE_EXTINFO_VERSION 1.4
 
 ExtInfo* extinfo;
 
@@ -75,7 +81,7 @@ extern "C" void ext_info_close()
 }
 
 ExtInfo::ExtInfo()
-    :extlist(ggPath("RExInfo.dat")),menuBirthday(false),menuNameDay(false)
+    :frmextinfo(NULL),extlist(ggPath("RExInfo.dat")),menuBirthday(false),menuNameDay(false)
 {
     kdebugf();
     ConfigDialog::addTab("ExtInfo",dataPath("kadu/modules/data/ext_info/ext_info_tab.png"));
@@ -96,7 +102,6 @@ ExtInfo::ExtInfo()
     QObject::connect(UserBox::userboxmenu, SIGNAL(popup()), this, SLOT(onPopupMenuCreate()));
     connect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
         this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
-    connect(&frmextinfo,SIGNAL(acceptChanges( const ExtList&)),this,SLOT(acceptChanges( const ExtList&)));
     connect(&timer, SIGNAL(timeout()), this, SLOT(checkAnniversary()));
     ConfigDialog::registerSlotOnApply(this, SLOT(onApplyConfigDialog()));
     restartTimer();
@@ -110,8 +115,9 @@ ExtInfo::~ExtInfo()
     QObject::disconnect(UserBox::userboxmenu, SIGNAL(popup()), this, SLOT(onPopupMenuCreate()));
     disconnect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
         this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
-    disconnect(&frmextinfo,SIGNAL(acceptChanges( const ExtList&)),this,SLOT(acceptChanges( const ExtList&)));
+
     disconnect(&timer, SIGNAL(timeout()), this, SLOT(checkAnniversary()));
+    closeWindow();
 
     ConfigDialog::disconnectSlot("ExtInfo","Import",SIGNAL(clicked()),this,SLOT(onImport()));
     ConfigDialog::disconnectSlot("ExtInfo","Export",SIGNAL(clicked()),this,SLOT(onExport()));
@@ -130,38 +136,64 @@ ExtInfo::~ExtInfo()
     kdebugf2();
 }
 
-void ExtInfo::showExtInfo()
+bool ExtInfo::UpdateUser()
 {
     kdebugf();
     UserList users;
-    UserBox *activeUserBox=kadu->userbox()->getActiveUserBox();
-    if (activeUserBox==NULL)
+    UserBox *activeUserBox = kadu->userbox()->getActiveUserBox();
+    if (activeUserBox == NULL)//to siê zdarza...
     {
         kdebugf2();
-        return;
+        return false;
     }
     users = activeUserBox->getSelectedUsers();
-    if (users.count() != 1)
+    if (users.count() == 1)
     {
+        user = (*users.begin());
         kdebugf2();
-        return;
+        return true;
     }
-    frmextinfo.show(extlist,(*users.begin()).altNick());
+    return false;
+    kdebugf2();
+}
+
+void ExtInfo::showExtInfo()
+{
+    kdebugf();
+    if (UpdateUser())
+        showExtInfo(user.altNick());
+    kdebugf2();
+}
+
+void ExtInfo::showExtInfo(const QString& section)
+{
+    kdebugf();
+    if (frmextinfo == NULL)
+    {
+        frmextinfo = new frmExtInfo();
+        connect(frmextinfo,SIGNAL(acceptChanges( const ExtList&)),this,SLOT(acceptChanges( const ExtList&)));
+        connect(frmextinfo,SIGNAL(closeWindow()),this,SLOT(closeWindow()));
+    }
+    frmextinfo->show(extlist,section);
+    kdebugf2();
+}
+
+void ExtInfo::closeWindow()
+{
+    kdebugf();
+    if (frmextinfo)
+    {
+        disconnect(frmextinfo,SIGNAL(closeWindow()),this,SLOT(closeWindow()));
+        disconnect(frmextinfo,SIGNAL(acceptChanges( const ExtList&)),this,SLOT(acceptChanges( const ExtList&)));
+        delete frmextinfo;
+        frmextinfo = NULL;
+    }
     kdebugf2();
 }
 
 void ExtInfo::onPopupMenuCreate()
 {
     kdebugf();
-    UserList users;
-    UserBox *activeUserBox=kadu->userbox()->getActiveUserBox();
-    if (activeUserBox==NULL)//to siê zdarza...
-    {
-        kdebugf2();
-        return;
-    }
-    users = activeUserBox->getSelectedUsers();
-    user = (*users.begin());
 
     if (menuBirthday)
     {
@@ -174,10 +206,9 @@ void ExtInfo::onPopupMenuCreate()
         menuNameDay = false;
     }
 
-    if (users.count() != 1)
-        UserBox::userboxmenu->setItemEnabled(UserBox::userboxmenu->getItem(tr("Display extended information")), false);
-    else
+    if (UpdateUser())
     {
+
         if (extlist.contains(user.altNick()))
         {
             int name_day = extlist[user.altNick()].daysToNameDay();
@@ -194,6 +225,10 @@ void ExtInfo::onPopupMenuCreate()
             }
         }
     }
+    else
+    {
+        UserBox::userboxmenu->setItemEnabled(UserBox::userboxmenu->getItem(tr("Display extended information")), false);
+    }
     kdebugf2();
 }
 
@@ -206,7 +241,10 @@ void ExtInfo::userDataChanged(const UserListElement* const oldData, const UserLi
     {
 
         extlist.renameItem(oldData->altNick(),newData->altNick());
-        frmextinfo.renameSection(oldData->altNick(),newData->altNick());
+        if (frmextinfo)
+        {
+            frmextinfo->renameSection(oldData->altNick(),newData->altNick());
+        }
     }
     kdebugf2();
 }
@@ -306,9 +344,9 @@ void ExtInfo::onApplyConfigDialog()
 void ExtInfo::onExport()
 {
     kdebugf();
-    if (frmextinfo.isShown())
+    if (frmextinfo)
     {
-        frmextinfo.setFocus();
+        frmextinfo->setFocus();
         MessageBox::wrn(tr("First you must close ext_info window"));
         kdebugf2();
         return;
@@ -336,9 +374,9 @@ void ExtInfo::onExport()
 void ExtInfo::onImport()
 {
     kdebugf();
-    if (frmextinfo.isShown())
+    if (frmextinfo)
     {
-        frmextinfo.setFocus();
+        frmextinfo->setFocus();
         MessageBox::wrn(tr("First you must close ext_info window"));
         kdebugf2();
         return;

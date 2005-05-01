@@ -4,38 +4,90 @@
 #include <qdatetime.h>
 #include <stdio.h>
 #include "debug.h"
+#include <iostream>
+using namespace std;
 
 ExtListElement::ExtListElement()
-    :know_birthday(false), know_name_day(false), photo_scaled(false)
+    :know_birthday(false), know_name_day(false), modified(false), photo_scaled(false)
 {
 }
 
 ExtListElement::ExtListElement(const ExtListElement& src)
-    :know_birthday(src.know_birthday), know_name_day(src.know_name_day),
-    nickname(src.nickname),
-    last_name(src.last_name),
-    first_name(src.first_name),
-    birthday(src.birthday),
-    name_day(src.name_day),
-    phone(src.phone),
-    mobile(src.mobile),
-    city(src.city),
-    street(src.street),
-    interests(src.interests),
-    www(src.www),
-    irc(src.irc),
-    wp(src.wp),
-    icq(src.icq),
-    tlen(src.tlen),
-    alt_gg(src.alt_gg),
-    memo(src.memo),
-    photo_path(src.photo_path),
-    photo_scaled(src.photo_scaled)
+{
+    *this = src;
+}
+
+ExtListElement& ExtListElement::operator=(const ExtListElement& src)
 {
     kdebugf();
+    know_birthday = src.know_birthday;
+    know_name_day = src.know_name_day;
+    modified = src.modified;
+    nickname = src.nickname;
+    last_name = src.last_name;
+    first_name = src.first_name;
+    birthday = src.birthday;
+    name_day = src.name_day;
+    phone = src.phone;
+    mobile = src.mobile;
+    city = src.city;
+    street = src.street;
+    interests = src.interests;
+    www = src.www;
+    irc = src.irc;
+    wp = src.wp;
+    icq = src.icq;
+    tlen = src.tlen;
+    alt_gg = src.alt_gg;
+    memo = src.memo;
+    photo_path = src.photo_path;
+    photo_scaled = src.photo_scaled;
     email[0] = src.email[0];
-    email[1] = src.email[0];
+    email[1] = src.email[1];
     kdebugf2();
+    return(*this);
+}
+
+// Nie wiem czemu, ale musia³em tak zrobiæ ¿eby zadzia³a³o :P
+bool streq(const QString& left, const QString& right)
+{
+    if ((left.length() == 0) && (right.length() == 0))
+    {
+        return true;
+    }
+    else
+    {
+        return(left == right);
+    }
+}
+
+bool ExtListElement::operator==(const ExtListElement& src) const
+{
+    kdebugf();
+    bool ret = true;
+    ret &= streq(nickname, src.nickname);
+    ret &= streq(last_name, src.last_name);
+    ret &= streq(first_name, src.first_name);
+    ret &= streq(birthday, src.birthday);
+    ret &= streq(name_day, src.name_day);
+    ret &= streq(phone, src.phone);
+    ret &= streq(mobile, src.mobile);
+    ret &= streq(city, src.city);
+    ret &= streq(street, src.street);
+    ret &= streq(interests, src.interests);
+    ret &= streq(www, src.www);
+    ret &= streq(irc, src.irc);
+    ret &= streq(wp, src.wp);
+    ret &= streq(icq, src.icq);
+    ret &= streq(tlen, src.tlen);
+    ret &= streq(alt_gg, src.alt_gg);
+    ret &= streq(memo, src.memo);
+    ret &= streq(photo_path, src.photo_path);
+    ret &= (photo_scaled == src.photo_scaled);
+    ret &= streq(email[0], src.email[0]);
+    ret &= streq(email[1], src.email[1]);
+    kdebugf2();
+    return ret;
 }
 
 int ExtListElement::daysToAnniversary(const QString& date)
@@ -51,14 +103,14 @@ int ExtListElement::daysToAnniversary(const QString& date)
     return current.daysTo(anniversary);
 }
 
-int ExtListElement::daysToBirthday()
+int ExtListElement::daysToBirthday() const
 {
     if (know_birthday || birthday.length() == 0)
         return -1;
     return daysToAnniversary(birthday);
 }
 
-int ExtListElement::daysToNameDay()
+int ExtListElement::daysToNameDay() const
 {
     if (know_name_day || name_day.length() == 0)
         return -1;

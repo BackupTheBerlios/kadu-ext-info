@@ -1,7 +1,7 @@
 #ifndef EXTINFOITEM_H
 #define EXTINFOITEM_H
 
-#define EXTINFO_VERSION "1.3.1"
+#define EXTINFO_VERSION "1.4"
 
 #include <qobject.h>
 #include <qstring.h>
@@ -16,6 +16,8 @@ class ExtListElement
         bool know_name_day;
         static int daysToAnniversary(const QString& date);
     public:
+        bool modified;
+
         QString nickname;
         QString last_name;
         QString first_name;
@@ -40,10 +42,13 @@ class ExtListElement
         ExtListElement();
         ExtListElement(const ExtListElement& src);
 
-        int daysToBirthday();
-        int daysToNameDay();
+        int daysToBirthday() const;
+        int daysToNameDay() const;
         void setKnowBirthday() {know_birthday = true;}
         void setKnowNameDay() {know_name_day = true;}
+        ExtListElement& operator=(const ExtListElement& src);
+        bool operator==(const ExtListElement& src) const;
+        bool operator!=(const ExtListElement& src) const {return (!(*this == src));}
 };
 
 class ExtList : public QMap<QString,ExtListElement>

@@ -132,7 +132,9 @@ protected slots:
 private:
     QString currentSection;
     QString photo_path;
+    int clicked;
     int getCheckBoxItem(const QString& name);
+    virtual void closeEvent ( QCloseEvent * e );
 
 private slots:
     void loadSection();
@@ -145,6 +147,7 @@ private slots:
     void testFormatNameday();
     void showAbout();
     void clickedOk();
+    void clockedCancel();
     void clickedRemoveSection();
     void clickedRemoveImage();
     void clickedLoadImage();
@@ -154,6 +157,7 @@ private slots:
 
 signals:
     void acceptChanges( const ExtList&);
+    void closeWindow();
 };
 
 #endif // FRMExtInfo_H
