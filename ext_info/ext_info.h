@@ -26,6 +26,9 @@ class ExtInfo : public QObject
 
         bool UpdateUser();
 
+        void RegisterInConfigDialog();
+        void UnregisterInConfigDialog();
+
     private slots:
         void acceptChanges( const ExtList&);
         void closeWindow();
@@ -35,6 +38,7 @@ class ExtInfo : public QObject
         void showExtInfo(const QString& section);
         void onPopupMenuCreate();
         void userDataChanged(const UserListElement* const oldData, const UserListElement* const newData,bool);
+        void userDataChanged(UserListElement elem, QString name, QVariant oldValue,QVariant currentValue, bool massively, bool last);
         void knowNameDay();
         void knowBirthday();
         void restartTimer();

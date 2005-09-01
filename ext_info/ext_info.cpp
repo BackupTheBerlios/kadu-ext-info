@@ -15,9 +15,13 @@
 
     ChangeLog:
 
-	[v1.4.1 ]
-	    * Dostosowano do zmian w Kadu 0.5.0, jednocze¶nie zachowano zgodno¶æ
-	      z Kadu 0.4.x
+        [v1.4.2 ]
+            * Dostosowano do zmian w Kadu 0.5.0-svn, jednocze¶nie zachowano
+              zgodno¶æ z Kadu 0.4.x
+
+        [v1.4.1 ]
+            * Dostosowano do zmian w Kadu 0.5.0, jednocze¶nie zachowano zgodno¶æ
+              z Kadu 0.4.x
 
         [v1.4 ]
             + Je¶li w oknie rozszerzonych informacji zostan± dokonane zmiany
@@ -63,13 +67,14 @@
 #include "ext_info.h"
 #include "message_box.h"
 #include "debug.h"
+#include "userbox.h"
 
 #ifdef EXTERNAL
 #include <modules/hint_manager.h>
 #else
 #include "../hints/hint_manager.h"
 #endif
-#define MODULE_EXTINFO_VERSION 1.4
+#define MODULE_EXTINFO_VERSION 1.4.2
 
 ExtInfo* extinfo;
 
@@ -88,6 +93,47 @@ ExtInfo::ExtInfo()
     :frmextinfo(NULL),extlist(ggPath("RExInfo.dat")),menuBirthday(false),menuNameDay(false)
 {
     kdebugf();
+    RegisterInConfigDialog();
+    UserBox::userboxmenu->addItem(dataPath("kadu/modules/data/ext_info/ext_info_menu.png"), tr("Display extended information"), this, SLOT(showExtInfo()));
+
+    QObject::connect(UserBox::userboxmenu, SIGNAL(popup()), this, SLOT(onPopupMenuCreate()));
+#if defined(KADU_0_4_x)
+    connect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
+        this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
+#elif defined(KADU_0_5_0)
+    connect(userlist, SIGNAL(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)),
+        this, SLOT(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)));
+#endif
+    connect(&timer, SIGNAL(timeout()), this, SLOT(checkAnniversary()));
+    ConfigDialog::registerSlotOnApply(this, SLOT(onApplyConfigDialog()));
+    restartTimer();
+    kdebugf2();
+}
+
+ExtInfo::~ExtInfo()
+{
+    kdebugf();
+    ConfigDialog::unregisterSlotOnApply(this, SLOT(onApplyConfigDialog()));
+    QObject::disconnect(UserBox::userboxmenu, SIGNAL(popup()), this, SLOT(onPopupMenuCreate()));
+#if defined(KADU_0_4_x)
+    disconnect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
+        this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
+#elif defined(KADU_0_5_0)
+    disconnect(userlist, SIGNAL(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)),
+        this, SLOT(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)));
+#endif
+
+    disconnect(&timer, SIGNAL(timeout()), this, SLOT(checkAnniversary()));
+    closeWindow();
+    UnregisterInConfigDialog();
+    int menuitem = UserBox::userboxmenu->getItem(tr("Display extended information"));
+    UserBox::userboxmenu->removeItem(menuitem);
+    kdebugf2();
+}
+
+void ExtInfo::RegisterInConfigDialog()
+{
+    kdebugf();
     ConfigDialog::addTab("ExtInfo",dataPath("kadu/modules/data/ext_info/ext_info_tab.png"));
     ConfigDialog::addVGroupBox("ExtInfo", "ExtInfo", QT_TRANSLATE_NOOP("@default", "Remind"));
     ConfigDialog::addCheckBox("ExtInfo", "Remind", QT_TRANSLATE_NOOP("@default", "Enable to remind of name day"), "name_day", TRUE);
@@ -100,29 +146,12 @@ ExtInfo::ExtInfo()
 
     ConfigDialog::connectSlot("ExtInfo","Import",SIGNAL(clicked()),this,SLOT(onImport()));
     ConfigDialog::connectSlot("ExtInfo","Export",SIGNAL(clicked()),this,SLOT(onExport()));
-
-    UserBox::userboxmenu->addItem(dataPath("kadu/modules/data/ext_info/ext_info_menu.png"), tr("Display extended information"), this, SLOT(showExtInfo()));
-
-    QObject::connect(UserBox::userboxmenu, SIGNAL(popup()), this, SLOT(onPopupMenuCreate()));
-    connect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
-        this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
-    connect(&timer, SIGNAL(timeout()), this, SLOT(checkAnniversary()));
-    ConfigDialog::registerSlotOnApply(this, SLOT(onApplyConfigDialog()));
-    restartTimer();
     kdebugf2();
 }
 
-ExtInfo::~ExtInfo()
+void ExtInfo::UnregisterInConfigDialog()
 {
     kdebugf();
-    ConfigDialog::unregisterSlotOnApply(this, SLOT(onApplyConfigDialog()));
-    QObject::disconnect(UserBox::userboxmenu, SIGNAL(popup()), this, SLOT(onPopupMenuCreate()));
-    disconnect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
-        this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
-
-    disconnect(&timer, SIGNAL(timeout()), this, SLOT(checkAnniversary()));
-    closeWindow();
-
     ConfigDialog::disconnectSlot("ExtInfo","Import",SIGNAL(clicked()),this,SLOT(onImport()));
     ConfigDialog::disconnectSlot("ExtInfo","Export",SIGNAL(clicked()),this,SLOT(onExport()));
 
@@ -135,22 +164,28 @@ ExtInfo::~ExtInfo()
     ConfigDialog::removeControl("ExtInfo","Enable to remind of birthday");
     ConfigDialog::removeControl("ExtInfo","Remind");
     ConfigDialog::removeTab("ExtInfo");
-    int menuitem = UserBox::userboxmenu->getItem(tr("Display extended information"));
-    UserBox::userboxmenu->removeItem(menuitem);
     kdebugf2();
 }
 
 bool ExtInfo::UpdateUser()
 {
     kdebugf();
+#if defined(KADU_0_4_x)
     UserList users;
     UserBox *activeUserBox = kadu->userbox()->getActiveUserBox();
+#elif defined(KADU_0_5_0)
+    UserBox *activeUserBox = kadu->userbox()->activeUserBox();
+#endif
     if (activeUserBox == NULL)//to siê zdarza...
     {
         kdebugf2();
         return false;
     }
+#if defined(KADU_0_4_x)
     users = activeUserBox->getSelectedUsers();
+#elif defined(KADU_0_5_0)
+    UserListElements users = activeUserBox->selectedUsers();
+#endif
     if (users.count() == 1)
     {
         user = (*users.begin());
@@ -158,6 +193,8 @@ bool ExtInfo::UpdateUser()
         return true;
     }
     return false;
+//#else
+//#endif
     kdebugf2();
 }
 
@@ -239,6 +276,7 @@ void ExtInfo::onPopupMenuCreate()
 void ExtInfo::userDataChanged(const UserListElement* const oldData, const UserListElement* const newData,bool massivielty)
 {
     kdebugf();
+#ifdef KADU_0_4_x
     if (!oldData || !newData)
         return;                 //To powodowa³o b³±d przy usuwaniu i dodawaniu kontaktów
     if (oldData->altNick() != newData->altNick())
@@ -250,6 +288,22 @@ void ExtInfo::userDataChanged(const UserListElement* const oldData, const UserLi
             frmextinfo->renameSection(oldData->altNick(),newData->altNick());
         }
     }
+#endif
+    kdebugf2();
+}
+
+void ExtInfo::userDataChanged(UserListElement elem, QString name, QVariant oldValue,QVariant currentValue, bool massively, bool last)
+{
+    kdebugf();
+#ifdef KADU_0_5_0
+    if (name != QString("AltNick"))
+        return;                 //To powodowa³o b³±d przy usuwaniu i dodawaniu kontaktów
+    extlist.renameItem(oldValue.toString(), currentValue.toString());
+    if (frmextinfo)
+    {
+        frmextinfo->renameSection(oldValue.toString(), currentValue.toString());
+    }
+#endif
     kdebugf2();
 }
 
@@ -268,19 +322,39 @@ void ExtInfo::checkAnniversary()
     {
         ExtList name_day = extlist.getCommingNameDay(config_file.readNumEntry("ExtInfo","remind",1));
         for (ExtList::iterator i = name_day.begin(); i != name_day.end(); i++)
+        {
+#if defined(KADU_0_4_x)
             hint_manager->message("ExtInfo",
                 formatNameDayInfo(i.key(),(*i).daysToNameDay()),
                 NULL,
                 userlist.containsAltNick(i.key()) ? &userlist.byAltNick(i.key()) : NULL);
+#elif defined(KADU_0_5_0)
+            UserListElement buff;
+            hint_manager->message("ExtInfo",
+                formatNameDayInfo(i.key(),(*i).daysToNameDay()),
+                NULL,
+                userlist->containsAltNick(i.key()) ? (buff = userlist->byAltNick(i.key()),&buff) : NULL);
+#endif
+        }
     }
     if (config_file.readBoolEntry("ExtInfo","birthday",true))
     {
         ExtList birthday = extlist.getCommingBirthday(config_file.readNumEntry("ExtInfo","remind",1));
         for (ExtList::iterator i = birthday.begin(); i != birthday.end(); i++)
+        {
+#if defined(KADU_0_4_x)
             hint_manager->message("ExtInfo",
                 formatBirthdayInfo(i.key(),(*i).daysToBirthday()),
                 NULL,
                 userlist.containsAltNick(i.key()) ? &userlist.byAltNick(i.key()) : NULL);
+#elif defined(KADU_0_5_0)
+            UserListElement buff;
+            hint_manager->message("ExtInfo",
+                formatBirthdayInfo(i.key(),(*i).daysToBirthday()),
+                NULL,
+                userlist->containsAltNick(i.key()) ? (buff = userlist->byAltNick(i.key()),&buff) : NULL);
+#endif
+        }
     }
     kdebugf2();
 }

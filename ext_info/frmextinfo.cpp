@@ -785,12 +785,20 @@ void frmExtInfo::scaledPhoto()
 void frmExtInfo::getDataFromKadu()
 {
     kdebugf();
+#if defined(KADU_0_4_x)
     if (!userlist.containsAltNick(currentSection))
+#elif defined(KADU_0_5_0)
+    if (!userlist->containsAltNick(currentSection))
+#endif
     {
         kdebugf2();
         return;
     }
+#if defined(KADU_0_4_x)
     UserListElement user = userlist.byAltNick(currentSection);
+#elif defined(KADU_0_5_0)
+    UserListElement user = userlist->byAltNick(currentSection);
+#endif
     leNickname->setText(user.nickName());
     leFirstName->setText(user.firstName());
     leLastName->setText(user.lastName());
