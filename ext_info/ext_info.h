@@ -2,6 +2,7 @@
 #define EXTINFO_H
 
 #include <qobject.h>
+#include <qtimer.h>
 #include "frmextinfo.h"
 #include "kadu.h"
 

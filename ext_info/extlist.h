@@ -1,7 +1,7 @@
 #ifndef EXTINFOITEM_H
 #define EXTINFOITEM_H
 
-#define EXTINFO_VERSION "1.4"
+#define EXTINFO_VERSION "1.4.1"
 
 #include <qobject.h>
 #include <qstring.h>

@@ -15,6 +15,10 @@
 
     ChangeLog:
 
+	[v1.4.1 ]
+	    * Dostosowano do zmian w Kadu 0.5.0, jednocze¶nie zachowano zgodno¶æ
+	      z Kadu 0.4.x
+
         [v1.4 ]
             + Je¶li w oknie rozszerzonych informacji zostan± dokonane zmiany
               i je¶li u¿ytkownik kliknie na "Anuluj" lub spróbuje zamkn±æ okno
