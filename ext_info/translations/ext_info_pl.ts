@@ -29,6 +29,10 @@
         <source>Export</source>
         <translation>Eksportuj</translation>
     </message>
+    <message>
+        <source>Show ext_info button in chat windows</source>
+        <translation>Pokaż przycisk ext_info w oknach rozmowy</translation>
+    </message>
 </context>
 <context>
     <name>ExtInfo</name>
@@ -67,6 +71,10 @@
     <message>
         <source>Display extended information</source>
         <translation>Rozszerzone informacje o kontaktcie</translation>
+    </message>
+    <message>
+        <source>Display standard information</source>
+        <translation>Informacje o kontaktcie</translation>
     </message>
     <message>
         <source>I know about birthday :)</source>

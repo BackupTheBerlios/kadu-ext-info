@@ -1,15 +1,7 @@
 #ifndef EXTINFOITEM_H
 #define EXTINFOITEM_H
 
-#define EXTINFO_VERSION "1.4.2"
-
-#include "config.h"
-
-#if defined(KADU_VERSION_0_4_0_cvs) || defined(KADU_VERSION_0_4_0) || defined(KADU_VERSION_0_4_1)
-#define KADU_0_4_x
-#elif defined(KADU_VERSION_0_5_0_svn) || defined(KADU_VERSION_0_5_0)
-#define KADU_0_5_0
-#endif
+#define EXTINFO_VERSION "1.5.0"
 
 #include <qobject.h>
 #include <qstring.h>
