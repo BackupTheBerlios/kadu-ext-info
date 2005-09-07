@@ -15,7 +15,12 @@
 
     ChangeLog:
 
-        [v1.5.0 ]
+        [v1.5.1 ]
+            * Podczas gdy w oknie konfiguracji zosta³y zaakceptowane zmiany,
+	      pojawia³o siê kilka ikon ext_info w oknie rozmowy. B³±d ten zosta³
+	      w³a¶nie naprawiony.
+
+        [v1.5 ]
             + Dodana ikona ext_info w oknie rozmowy
             * Zerwanie kompatybilno¶ci z Kadu 0.4.x
 
@@ -81,7 +86,7 @@
 #else
 #include "../hints/hint_manager.h"
 #endif
-#define MODULE_EXTINFO_VERSION 1.5.0
+#define MODULE_EXTINFO_VERSION 1.5.1
 
 ExtInfo* extinfo;
 
@@ -476,7 +481,10 @@ void ExtInfo::restartTimer()
 void ExtInfo::onApplyConfigDialog()
 {
     if (config_file.readBoolEntry("ExtInfo","button",true))
-        CreateChatButton();
+    {
+        if (chatmenu == NULL)
+	    CreateChatButton();
+    }
     else
         DestroyChatButton();
     restartTimer();
