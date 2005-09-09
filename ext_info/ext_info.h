@@ -7,63 +7,58 @@
 #include "kadu.h"
 #include "chat.h"
 
+class QHttp;
+
 class ExtInfo : public QObject
 {
     Q_OBJECT
 
-    public:
-        ExtInfo();
-        ~ExtInfo();
-    private:
-        frmExtInfo *frmextinfo;
-        ExtList extlist;
-        QTimer timer;
-        bool menuBirthday;
-        bool menuNameDay;
-        UserListElement user;   // User, ktorego popup menu sie wyswietli³o
+public:
+    virtual ~ExtInfo();
+                    // pobierz ¶cie¿kê do pliku znajduj±cego siê w katalogu:
+    virtual QString moduleDataPath(const QString &filename) = 0;// danych modu³u
+    virtual QString extinfoPath(const QString &filename) = 0;   // ustawieñ modu³u w profilu u¿ytkownika
 
-        QPopupMenu *chatmenu;   // Menu pojawiajace sie po klikniecu w przycisk ext_info w oknie rozmowy
-        int popups[2];
-        QMap<Chat*,QPushButton*> chatButtons;
+protected:
 
-        QString formatBirthdayInfo(const QString& name, int days);
-        QString formatNameDayInfo(const QString& name, int days);
+    //Ustawienia (z okna konfiguracji)
+    bool remindNameday;         // przypominaj o imieninach
+    bool remindBirthday;        //     ,,      o urodzinach
+    int beforeRemind;           // ilo¶æ dni przed
+    int remindFrequency;        // co ile minut wy¶wietla dymek z przypomnieniem
+    bool showButton;            // poka¿ przycisk ext_info w oknie rozmowy
+    bool checkUpdateStable;     // sprawdzaj czy jest nowa wersja stablina ext_info
+    bool checkUpdateUnstable;   //      ,,           ,,           rozwojowa    ,,
 
-        bool UpdateUser();
 
-        void RegisterInConfigDialog();
-        void UnregisterInConfigDialog();
+    frmExtInfo *frmextinfo;
+    QHttp *http;
+    ExtList extlist;
+    QTimer timer;
+    QString currentUser;
 
-        void RegisterSignals();
-        void UnregisterSignals();
+    QString formatBirthdayInfo(const QString& name, int days);
+    QString formatNameDayInfo(const QString& name, int days);
 
-        void CreateChatButton();
-        void DestroyChatButton();
+    ExtInfo(const QString &datafile);
 
-        void handleCreatedChat(Chat* chat);
-        void handleDestroyingChat(Chat* chat);
+    virtual bool getSelectedUser(QString &user) = 0;
+    virtual void showRemindAnniversary(const QString &str, const QString &user) = 0;
+    void restartTimer();
 
-        Chat* getCurrentChat();
+protected slots:
+    void acceptChanges( const ExtList&);
+    void closeWindow();
+    void checkAnniversary();
 
-    private slots:
-        void acceptChanges( const ExtList&);
-        void closeWindow();
-        void checkAnniversary();
-        void chatCreated(const UserGroup*);
-        void chatDestroying(const UserGroup*);
-    public slots:
-        void showExtInfo();
-        void showExtInfo(const QString& section);
-        void showChatUserInfo();
-        void showChatExtInfo();
-        void onPopupMenuCreate();
-        void userDataChanged(UserListElement elem, QString name, QVariant oldValue,QVariant currentValue, bool massively, bool last);
-        void knowNameDay();
-        void knowBirthday();
-        void restartTimer();
-        void onApplyConfigDialog();
-        void onExport();
-        void onImport();
+public slots:
+    void changeCurrentUser(const QString &newUser); // chyba bedzie niepotrzebne
+    void changeUserName(const QString& oldName, const QString& newName);    // Gdy zmieni³ siê altNick kogo¶
+
+    void showExtInfo();
+    void showExtInfo(const QString& section);
+    void onExport();
+    void onImport();
 };
 
 #endif

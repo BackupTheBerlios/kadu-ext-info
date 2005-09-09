@@ -6,9 +6,8 @@
 #include <qmessagebox.h>
 #include <qfiledialog.h>
 #include "extlist.h"
-#include "misc.h"
-#include "userlist.h"
 
+class QTextBrowser;
 class QVBoxLayout;
 class QHBoxLayout;
 class QGridLayout;
@@ -24,16 +23,21 @@ class QTextEdit;
 class QCheckBox;
 class QFrame;
 class QScrollView;
+class GetDataFromKadu;
 
 class frmExtInfo : public QDialog
 {
     Q_OBJECT
 
 public:
-    frmExtInfo( QWidget* parent = 0, const char* name = 0, bool modal = FALSE, WFlags fl = 0 );
+    frmExtInfo(QWidget* parent = 0, const char* name = 0, bool modal = FALSE, WFlags fl = 0);
     ~frmExtInfo();
 
     QTabWidget* tabWidget;
+
+    QWidget* tabGeneral;
+    QTextBrowser* tbGeneral;
+
     QWidget* tabInfo;
     QButtonGroup* bgInfo;
     QLineEdit* leBirthDay;
@@ -61,6 +65,7 @@ public:
     QLabel* tlStreet;
     QLabel* tlCity;
     QLineEdit* leCity;
+
     QWidget* tabNet;
     QButtonGroup* bgNet;
     QLineEdit* leSecondGG;
@@ -79,16 +84,20 @@ public:
     QLabel* tlEmail2;
     QLabel* tlWWW;
     QLineEdit* leICQ;
+
     QWidget* tabMemo;
     QTextEdit* teMemo;
     QLabel* tlMemo;
+
     QWidget* tabPhoto;
     QLabel* tlPathImage;
     QButtonGroup* bgPhoto;
     QPushButton* pbLoadImage;
     QPushButton* pbRemoveImage;
+    QPushButton* pbAvatar;
     QCheckBox* cbScaled;
     QScrollView* fPhoto;
+
     QWidget* wPhoto;
     QLabel* plPhoto;
     QPushButton* pbOk;
@@ -104,6 +113,9 @@ public slots:
 
 protected:
     QGridLayout* frmExtInfoLayout;
+
+    QGridLayout* tabGeneralLayout;
+
     QGridLayout* tabInfoLayout;
     QGridLayout* bgInfoLayout;
     QGridLayout* lGeneral;
@@ -131,14 +143,24 @@ protected slots:
 
 private:
     QString currentSection;
+    GetDataFromKadu *kaduData;
+    //UinType currentUin;
     QString photo_path;
+    QString getPhotoPath();
+
+    QString infoTemplate;
+
     int clicked;
+
+    bool loadInfoTemplate();
     int getCheckBoxItem(const QString& name);
+    //UinType getGGUin();
     virtual void closeEvent ( QCloseEvent * e );
 
 private slots:
     void loadSection();
     void updateSection();
+    void updateInfoTab();
     void loadImage( const QString & image );
 
     void cbChangeSection( const QString & name );
@@ -151,12 +173,14 @@ private slots:
     void clickedRemoveSection();
     void clickedRemoveImage();
     void clickedLoadImage();
+    void clickedAvatar();
+    //void currentTabChanged(QWidget *);
     void checkScaledImage( int scaled );
     void getDataFromKadu();
-    void tabCurrentChanged ( QWidget * );
+    void tabCurrentChanged(QWidget *);
 
 signals:
-    void acceptChanges( const ExtList&);
+    void acceptChanges(const ExtList&);
     void closeWindow();
 };
 

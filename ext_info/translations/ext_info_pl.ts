@@ -33,6 +33,14 @@
         <source>Show ext_info button in chat windows</source>
         <translation>Pokaż przycisk ext_info w oknach rozmowy</translation>
     </message>
+    <message>
+        <source>Check for new unstable version</source>
+        <translation>Sprawdzaj czy są nowe rozwojowe wersje ext_info</translation>
+    </message>
+    <message>
+        <source>Check for new stable version</source>
+        <translation>Sprawdzaj czy są nowe stabilne wersje ext_info</translation>
+    </message>
 </context>
 <context>
     <name>ExtInfo</name>
@@ -69,22 +77,6 @@
         <translation> ma dziś urodziny</translation>
     </message>
     <message>
-        <source>Display extended information</source>
-        <translation>Rozszerzone informacje o kontaktcie</translation>
-    </message>
-    <message>
-        <source>Display standard information</source>
-        <translation>Informacje o kontaktcie</translation>
-    </message>
-    <message>
-        <source>I know about birthday :)</source>
-        <translation>Wiem o urodzinach :)</translation>
-    </message>
-    <message>
-        <source>I know about name day :)</source>
-        <translation>Wiem o imieninach :)</translation>
-    </message>
-    <message>
         <source>First you must close ext_info window</source>
         <translation>Najpierw musisz zamknąć okno ext_info</translation>
     </message>
@@ -103,6 +95,45 @@
     <message>
         <source>Error read file</source>
         <translation>Błąd odczytu pliku</translation>
+    </message>
+</context>
+<context>
+    <name>KaduExtInfo</name>
+    <message>
+        <source>Display extended information</source>
+        <translation>Rozszerzone informacje o kontaktcie</translation>
+    </message>
+    <message>
+        <source>Display standard information</source>
+        <translation>Informacje o kontaktcie</translation>
+    </message>
+    <message>
+        <source>I know about birthday :)</source>
+        <translation>Wiem o urodzinach :)</translation>
+    </message>
+    <message>
+        <source>I know about name day :)</source>
+        <translation>Wiem o imieninach :)</translation>
+    </message>
+    <message>
+        <source>ext_info v</source>
+        <translation>Moduł ext_info v</translation>
+    </message>
+    <message>
+        <source> was imported settings from previous version.</source>
+        <translation> dokonał importu ustawień z poprzedniej wersji.</translation>
+    </message>
+    <message>
+        <source>New %1 version ext_info is available: %2</source>
+        <translation>Dostępna jest nowa %1 wersja ext_info: %2</translation>
+    </message>
+    <message>
+        <source>experimental</source>
+        <translation>rozwojowa</translation>
+    </message>
+    <message>
+        <source>stable</source>
+        <translation>stabilna</translation>
     </message>
 </context>
 <context>
@@ -193,6 +224,10 @@
     </message>
     <message>
         <source>Info</source>
+        <translation>Informacje</translation>
+    </message>
+    <message>
+        <source>General</source>
         <translation>Główne</translation>
     </message>
     <message>
@@ -314,6 +349,48 @@
     <message>
         <source>Do you want to save changes?</source>
         <translation>Czy chcesz zachować zmiany?</translation>
+    </message>
+    <message>
+        <source>info_template_en.html</source>
+        <translation>info_template_pl.html</translation>
+    </message>
+</context>
+<context>
+    <name>frmAvatar</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Anuluj</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Ustawienia</translation>
+    </message>
+    <message>
+        <source>Load image</source>
+        <translation>Wczytaj zdjęcie</translation>
+    </message>
+    <message>
+        <source>All Pixmaps</source>
+        <translation>Wszystkie obrazy</translation>
+    </message>
+    <message>
+        <source>All files</source>
+        <translation>Wszystkie pliki</translation>
+    </message>
+</context>
+<context>
+    <name>frmSize</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Anuluj</translation>
+    </message>
+    <message>
+        <source>Avatar Size</source>
+        <translation>Rozmiar avatara</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>Własny</translation>
     </message>
 </context>
 </TS>

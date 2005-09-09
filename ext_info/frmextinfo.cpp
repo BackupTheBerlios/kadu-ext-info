@@ -1,6 +1,7 @@
 #include "frmextinfo.h"
-#include "debug.h"
+#include "ext_general.h"
 
+#include <qtextbrowser.h>
 #include <qvariant.h>
 #include <qpushbutton.h>
 #include <qtabwidget.h>
@@ -18,18 +19,33 @@
 #include <qwhatsthis.h>
 #include <qdatetime.h>
 #include <qfile.h>
+#include <qtextcodec.h>
+#include <qdir.h>
 
-frmExtInfo::frmExtInfo( QWidget* parent, const char* name, bool modal, WFlags fl )
-    : QDialog( parent, name, modal, fl ),clicked(QMessageBox::NoButton)
+#include "frmavatar.h"
+
+frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
+    : QDialog(parent, name, modal, fl), kaduData(new GetDataFromKadu), clicked(QMessageBox::NoButton)
 {
     kdebugf();
-    if ( !name )
     setName( "frmExtInfo" );
+
+    if (loadInfoTemplate() == false)
+        infoTemplate = QString("Nie znaleziono pliku ") + tr(EXTINFO_INFOTEMPLATE);
+
     frmExtInfoLayout = new QGridLayout( this, 1, 1, 11, 6, "frmExtInfoLayout");
 
     tabWidget = new QTabWidget( this, "tabWidget" );
-    tabWidget->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)5, (QSizePolicy::SizeType)5, 0, 0, tabWidget->sizePolicy().hasHeightForWidth() ) );
 
+    // Pierwszy tab (General)
+    tabGeneral = new QWidget(tabWidget, "tabGeneral");
+    tabGeneralLayout = new QGridLayout(tabGeneral, 1, 1, 11, 6, "tabGeneralLayout");
+    tbGeneral = new QTextBrowser(tabGeneral, "tbGeneral");
+    tabGeneralLayout->addWidget(tbGeneral, 0, 0);
+    tabWidget->insertTab(tabGeneral, QString(""));
+    //tbGeneral->setText(infoTemplate + globalPath + userPath);
+
+    // Tab Info
     tabInfo = new QWidget( tabWidget, "tabInfo" );
     tabInfoLayout = new QGridLayout( tabInfo, 1, 1, 0, 6, "tabInfoLayout");
 
@@ -267,6 +283,7 @@ frmExtInfo::frmExtInfo( QWidget* parent, const char* name, bool modal, WFlags fl
     tabMemoLayout->addWidget( tlMemo, 1, 0 );
     tabWidget->insertTab( tabMemo, QString("") );
 
+    // Tab photo
     tabPhoto = new QWidget( tabWidget, "tabPhoto" );
     tabPhotoLayout = new QGridLayout( tabPhoto, 1, 1, 11, 6, "tabPhotoLayout");
 
@@ -291,6 +308,9 @@ frmExtInfo::frmExtInfo( QWidget* parent, const char* name, bool modal, WFlags fl
 
     pbRemoveImage = new QPushButton( bgPhoto, "pbRemoveImage" );
     lPhoto->addWidget( pbRemoveImage );
+
+    pbAvatar = new QPushButton(bgPhoto, "pbAvatar");
+    lPhoto->addWidget(pbAvatar);
 
     cbScaled = new QCheckBox( bgPhoto, "cbScaled" );
     cbScaled->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, cbScaled->sizePolicy().hasHeightForWidth() ) );
@@ -347,6 +367,7 @@ frmExtInfo::frmExtInfo( QWidget* parent, const char* name, bool modal, WFlags fl
     connect( cbScaled, SIGNAL( stateChanged(int) ), this, SLOT( checkScaledImage(int) ) );
     connect( pbRemoveImage, SIGNAL( clicked() ), this, SLOT( clickedRemoveImage() ) );
     connect( pbLoadImage, SIGNAL( clicked() ), this, SLOT( clickedLoadImage() ) );
+    connect(pbAvatar, SIGNAL(clicked()), this, SLOT(clickedAvatar()));
     connect( pbGetData,SIGNAL( clicked() ),this, SLOT( getDataFromKadu()));
     connect( tabWidget,(SIGNAL(currentChanged ( QWidget * ))),this, SLOT(tabCurrentChanged ( QWidget * )));
 
@@ -407,7 +428,30 @@ frmExtInfo::~frmExtInfo()
 {
     kdebugf();
     destroy();
+    delete kaduData;
     kdebugf2();
+}
+
+bool frmExtInfo::loadInfoTemplate()
+{
+    QFile file;
+    QString fn;
+    if (QFile::exists(fn = extinfo->extinfoPath(tr(EXTINFO_INFOTEMPLATE))) == false)
+        if (QFile::exists(fn = extinfo->moduleDataPath(tr(EXTINFO_INFOTEMPLATE))) == false)
+            return false;
+    file.setName(fn);
+    if (!file.open(IO_ReadOnly))
+        return false;
+    QTextStream stream(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF8"));
+    infoTemplate = "";
+    while (!stream.atEnd())
+    {
+        QString line = stream.readLine();
+        infoTemplate += line;
+    }
+    file.close();
+    return true;
 }
 
 void frmExtInfo::clockedCancel()
@@ -453,7 +497,11 @@ void frmExtInfo::closeEvent ( QCloseEvent * e )
 void frmExtInfo::languageChange()
 {
     kdebugf();
-    setCaption( tr( "Extension info" ) );
+    setCaption(tr("Extension info"));
+
+    tabWidget->changeTab(tabGeneral, tr("Info"));
+    tabWidget->changeTab(tabInfo, tr("General"));
+
     bgInfo->setTitle( QString::null );
     QToolTip::add( leBirthDay, tr( "Format: dd.mm.yyyy" ) );
     QToolTip::add( lePhone, tr( "Phone number" ) );
@@ -475,7 +523,6 @@ void frmExtInfo::languageChange()
     tlStreet->setText( tr( "Street:" ) );
     tlCity->setText( tr( "City:" ) );
     QToolTip::add( leCity, tr( "Zip and City" ) );
-    tabWidget->changeTab( tabInfo, tr( "Info" ) );
     bgNet->setTitle( QString::null );
     tlSecondGG->setText( tr( "Second GG:" ) );
     tlTlen->setText( tr( "Tlen Nick:" ) );
@@ -492,6 +539,7 @@ void frmExtInfo::languageChange()
     bgPhoto->setTitle( QString::null );
     pbLoadImage->setText( tr( "Load image" ) );
     pbRemoveImage->setText( tr( "Remove image" ) );
+    pbAvatar->setText(tr("Avatar"));
     cbScaled->setText( tr( "Scaled" ) );
     tabWidget->changeTab( tabPhoto, tr( "Photo" ) );
     pbOk->setText( tr( "OK" ) );
@@ -525,7 +573,62 @@ void frmExtInfo::loadSection()
     teMemo->setText(extlist[currentSection].memo);
     cbScaled->setChecked(extlist[currentSection].photo_scaled);
     loadImage(extlist[currentSection].photo_path);
+    //currentUin = getGGUin();
+
+    updateInfoTab();
+
     kdebugf2();
+}
+
+void frmExtInfo::updateInfoTab()
+{
+    QString info = infoTemplate;
+/*
+    info.replace("{nick}", extlist[currentSection].nickname);
+    info.replace("{avatar}", extlist[currentSection].photo_path);
+    info.replace("{first_name}", extlist[currentSection].first_name);
+    info.replace("{last_name}", extlist[currentSection].last_name);
+    info.replace("{street}", extlist[currentSection].street);
+    info.replace("{city}", extlist[currentSection].city);
+    info.replace("{birthday}", extlist[currentSection].birthday);
+    info.replace("{name_day}", extlist[currentSection].name_day);
+    info.replace("{phone}", extlist[currentSection].phone);
+    info.replace("{mobile}", extlist[currentSection].mobile);
+    info.replace("{interests}", extlist[currentSection].interests);
+    info.replace("{email0}", extlist[currentSection].email[0]);
+    info.replace("{email1}", extlist[currentSection].email[1]);
+    info.replace("{www}", extlist[currentSection].www);
+    info.replace("{irc}", extlist[currentSection].irc);
+    info.replace("{wp}", extlist[currentSection].wp);
+    info.replace("{tlen}", extlist[currentSection].tlen);
+    info.replace("{alt_gg}", extlist[currentSection].alt_gg);
+    info.replace("{memo}", extlist[currentSection].memo);
+*/
+    info.replace("{gg}", kaduData->found ? QString("%1").arg(kaduData->UIN) : "");
+    info.replace("{ggnick}", currentSection);
+    info.replace("{nickorggnick}", leNickname->text().length() ? leNickname->text() : currentSection);
+    info.replace("{nick}", leNickname->text());
+    info.replace("{avatar}", getPhotoPath());
+    info.replace("{avatar_width}", (photo_path[0] == '/') ? "width" : "none");
+    info.replace("{first_name}", leFirstName->text());
+    info.replace("{last_name}", leLastName->text());
+    info.replace("{street}", leStreet->text());
+    info.replace("{city}", leCity->text());
+    info.replace("{birthday}", leBirthDay->text());
+    info.replace("{name_day}", leNameDay->text());
+    info.replace("{phone}", lePhone->text());
+    info.replace("{mobile}", leMobile->text());
+    info.replace("{interests}", leInterests->text());
+    info.replace("{email1}", leEmail1->text());
+    info.replace("{email2}", leEmail2->text());
+    info.replace("{www}", leWWW->text());
+    info.replace("{irc}", leIRC->text());
+    info.replace("{icq}", leICQ->text());
+    info.replace("{wp}", leWP->text());
+    info.replace("{tlen}", leTlen->text());
+    info.replace("{alt_gg}", leSecondGG->text());
+    info.replace("{memo}", QString(teMemo->text()).replace("\n","<br>"));
+    tbGeneral->setText(info);
 }
 
 void frmExtInfo::cbChangeSection( const QString &name )
@@ -533,6 +636,7 @@ void frmExtInfo::cbChangeSection( const QString &name )
     kdebugf();
     updateSection();
     currentSection = name;
+    kaduData->load(name);
     loadSection();
     kdebugf2();
 }
@@ -697,16 +801,26 @@ void frmExtInfo::clickedRemoveSection()
     kdebugf2();
 }
 
+QString frmExtInfo::getPhotoPath()
+{
+    if (photo_path.length() && (photo_path[0] != '/'))
+        return extinfo->extinfoPath(photo_path);
+    else
+        return photo_path;
+}
 
 void frmExtInfo::loadImage( const QString & image )
 {
     kdebugf();
     photo_path = image;
-    if (image.length() && QFile::exists(image))
+    QString img = getPhotoPath();
+
+    if (img.length() && QFile::exists(img))
     {
         wPhoto->show();
-        plPhoto->setPixmap(QPixmap(image));
+        plPhoto->setPixmap(QPixmap(img));
         scaledPhoto();
+        tbGeneral->reload();
     }
     else
     {
@@ -714,7 +828,7 @@ void frmExtInfo::loadImage( const QString & image )
         plPhoto->clear();
         photo_path = "";
     }
-    tlPathImage->setText(tr ("Path image: ") + image);
+    tlPathImage->setText(tr ("Path image: ") + photo_path);
     kdebugf2();
 }
 
@@ -736,6 +850,36 @@ void frmExtInfo::clickedLoadImage()
     kdebugf2();
 }
 
+QString encodeName(const QString &name)
+{
+    QString out;
+    for (uint i = 0; i < name.length(); i++)
+    {
+        if (((name[i] >= 'a') && (name[i] <= 'z')) || ((name[i] >= 'A') && (name[i] <= 'Z')) || ((name[i] >= '0') && (name[i] <= '9')))
+            out += name[i];
+        else
+            out += QString("_%1").arg(int(name[i]),2,16);
+    }
+    return out;
+}
+
+void frmExtInfo::clickedAvatar()
+{
+    // A kurwa nie iwem co z tym :/
+    /*srand(time(NULL));
+    unsigned int name = (rand() << 16) + rand();
+    QString n;
+    if (photo_path.find(userPath) == -1)
+    {
+        n = userPath + QString("%1.jpg").arg(name);
+    }
+    else
+        n = photo_pathl*/
+    QString n = encodeName(currentSection) + QString(".jpg");
+    frmAvatar frmavatar(extinfo->extinfoPath(n), getPhotoPath(), this);
+    if (frmavatar.exec() == QDialog::Accepted)
+        loadImage(n);
+}
 
 void frmExtInfo::checkScaledImage(int scaled)
 {
@@ -785,17 +929,16 @@ void frmExtInfo::scaledPhoto()
 void frmExtInfo::getDataFromKadu()
 {
     kdebugf();
-    if (!userlist->containsAltNick(currentSection))
+    if (!kaduData->found)
     {
         kdebugf2();
         return;
     }
-    UserListElement user = userlist->byAltNick(currentSection);
-    leNickname->setText(user.nickName());
-    leFirstName->setText(user.firstName());
-    leLastName->setText(user.lastName());
-    leMobile->setText(user.mobile());
-    leEmail1->setText(user.email());
+    leNickname->setText(kaduData->nickName);
+    leFirstName->setText(kaduData->firstName);
+    leLastName->setText(kaduData->lastName);
+    leMobile->setText(kaduData->mobile);
+    leEmail1->setText(kaduData->email);
     kdebugf2();
 }
 
@@ -823,5 +966,7 @@ void frmExtInfo::tabCurrentChanged ( QWidget * tab)
     kdebugf();
     if (tab == tabPhoto)
         scaledPhoto();
+    else if (tab == tabGeneral)
+        updateInfoTab();
     kdebugf2();
 }
