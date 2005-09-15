@@ -8,3 +8,5 @@ extlist.h - Zawiera klasê przechowuj±c± listê kontaktów. Klasa ta odpowiada za z
 frmextinfo.h - Okno g³ówne modu³u
 frmavatar.h - Okno edytora avatarów
 frmsize.h - Okno ustawieñ rozmiaru avatarów
+
+ext_dnd.h - Klasa ScrollImage obs³uguj±ca Drag&Drop

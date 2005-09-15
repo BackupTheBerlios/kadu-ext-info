@@ -1,8 +1,8 @@
 #ifndef ext_generalH
 #define ext_generalH
 
-#define EXTINFO_VERSION "2.0 beta 1"
-#define EXTINFO_PACKED_VERSION "020000b01"
+#define EXTINFO_VERSION "2.0 beta 2"
+#define EXTINFO_PACKED_VERSION "020000b02"
 #define EXTINFO_INFOTEMPLATE "info_template_en.html"
 #define MODULE_EXTINFO_VERSION 2.0
 
@@ -108,5 +108,6 @@ private slots:
 
 extern KaduExtInfo *extinfo;
 bool MigrateFromOldVersion();
+void OpenWebBrowser(const QString &url);
 
 #endif //ext_generalH

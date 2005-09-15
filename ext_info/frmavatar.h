@@ -7,6 +7,7 @@
 #include <qscrollview.h>
 #include <qpainter.h>
 #include <qlabel.h>
+#include "ext_dnd.h"
 
 class QVBoxLayout;
 class QHBoxLayout;
@@ -41,11 +42,21 @@ private:
     void moveXY(int X, int Y, bool Emit = true);
     void moveWH(int W, int H, bool Emit = true);
     void moveLine(int &a, int &b, int na, int nb);
+    //void dragEnterEvent (QDragEnterEvent *);
 
 signals:
     void onChangeSelected(const QRect &rect);
     void onEndChangedSelected(const QRect &rect);
 };
+
+/*class AvatarScrollImage : public ScrollImage
+{
+    Q_OBJECT
+protected:
+    void createImage();
+public:
+    AvatarScrollImage(QWidget * parent, const char * name = "", WFlags f = 0);
+};*/
 
 class frmAvatar : public QDialog
 {
@@ -55,7 +66,8 @@ public:
     frmAvatar(const QString &filename,const QString &photo = "", QWidget* parent = 0, const char* name = 0, bool modal = TRUE, WFlags fl = 0 );
     ~frmAvatar();
 
-    QScrollView* svImage;
+    //QScrollView* svImage;
+    ScrollImage* siImage;
     QFrame* frameSettings;
     QFrame* framePreview;
     QLabel* pixmapPreview;
@@ -83,6 +95,7 @@ protected:
 
 protected slots:
     virtual void languageChange();
+    void onDragImageFile(const QString&);
 
 private:
     QPixmap imageLock[2];

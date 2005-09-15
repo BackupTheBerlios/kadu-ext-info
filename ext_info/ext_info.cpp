@@ -15,7 +15,15 @@
 
     ChangeLog:
 
-        [v2.0 ]
+        [v2.0 beta 2]
+            * Kolejne po¿±dki w kodzie
+            * Usprawnienie podgl±du zdjêcia
+            + Okno podgl±du zdjêcia oraz okno edycji avatara przyjmuj± Drag and
+              Drop w formacie text/uri odnosz±ce siê do lokalnego pliku.
+            + Po klikniêciu na link do strony, otwiera siê ona w przegl±darce
+              ustawionej w opcjach Kadu
+
+        [v2.0 beta 1]
             + Dodana zak³adka z wypisanymi wszystkimi danymi o kontakcie, wraz
               z wy¶wietleniem zdjêcia.
             + Dodany modu³ tworzenia avatarów (zak³adka "Zdjêcie"->przycisk

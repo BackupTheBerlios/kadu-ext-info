@@ -31,8 +31,8 @@ frmAvatar::frmAvatar(const QString &filename,const QString &photo, QWidget* pare
     setName( "frmAvatar" );
     frmAvatarLayout = new QHBoxLayout( this, 11, 6, "frmAvatarLayout");
 
-    svImage = new QScrollView( this, "svImage" );
-    frmAvatarLayout->addWidget( svImage );
+    siImage = new ScrollImage("", this, "siImage" );
+    frmAvatarLayout->addWidget( siImage );
 
     frameSettings = new QFrame( this, "frameSettings" );
     frameSettings->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)4, (QSizePolicy::SizeType)5, 0, 0, frameSettings->sizePolicy().hasHeightForWidth() ) );
@@ -113,6 +113,7 @@ frmAvatar::frmAvatar(const QString &filename,const QString &photo, QWidget* pare
     connect(pbLoadImage, SIGNAL(clicked()), this, SLOT(onLoadImagaClicked()));
     connect(pbOk, SIGNAL(clicked()), this, SLOT(onOkClicked()));
     connect(pbCancel, SIGNAL(clicked()), this, SLOT(reject()));
+    connect(siImage, SIGNAL(onDragImageFile(const QString&)), this, SLOT(onDragImageFile(const QString&)));
     //connect(pbSave, SIGNAL(clicked()), this, SLOT(onSaveImageClicked()));
 }
 
@@ -192,15 +193,17 @@ bool frmAvatar::loadImage(const QString &fileName)
     if (image)
     {
         delete image;
-        svImage->removeChild(pixmapImage);
+        //svImage->removeChild(pixmapImage);
         disconnect (pixmapImage, SIGNAL(onEndChangedSelected(const QRect &)), this, SLOT(onEndChangedSelected(const QRect &)));
         disconnect (pixmapImage, SIGNAL(onChangeSelected(const QRect &)), this, SLOT(onChangeSelected(const QRect &)));
+        siImage->clearImage();
         delete pixmapImage;
     }
     image = buff;
-    pixmapImage = new Pixmap(*image, locked, avWidth, avHeight, svImage->viewport(), "pixmapImage");
+    pixmapImage = new Pixmap(*image, locked, avWidth, avHeight, siImage->viewport(), "pixmapImage");
     pixmapImage->show();
-    svImage->addChild(pixmapImage);
+    //svImage->addChild(pixmapImage);
+    siImage->setPixmapViewport(pixmapImage);
     connect (pixmapImage, SIGNAL(onChangeSelected(const QRect &)), this, SLOT(onChangeSelected(const QRect &)));
     connect (pixmapImage, SIGNAL(onEndChangedSelected(const QRect &)), this, SLOT(onEndChangedSelected(const QRect &)));
     onChangeSelected(pixmapImage->getSelected());
@@ -240,6 +243,11 @@ void frmAvatar::onSettingsClicked()
     }
 }
 
+void frmAvatar::onDragImageFile(const QString& filename)
+{
+    loadImage(filename);
+}
+
 Pixmap::Pixmap(const QPixmap &picture, bool scaled, int W, int H, QWidget* parent, const char* name)
     :QLabel(parent, name), avScaled(scaled), avRatio(double(H) / double(W))
 {
@@ -248,6 +256,7 @@ Pixmap::Pixmap(const QPixmap &picture, bool scaled, int W, int H, QWidget* paren
     setFixedSize(picture.width(), picture.height());
     moveXY(-1,-1);
     moveWH(width(), height());
+    //setAcceptDrops(TRUE);
 }
 
 Pixmap::~Pixmap()
@@ -357,3 +366,26 @@ void Pixmap::mouseReleaseEvent(QMouseEvent*)
 {
     emit onEndChangedSelected(getSelected());
 }
+
+/*AvatarScrollImage::AvatarScrollImage(QWidget * parent, const char * name, WFlags f)
+    :ScrollImage("",parent, name, f)
+{
+}
+
+void AvatarScrollImage::setImage(const QPixmap &image)
+{
+    if (pixmapView == NULL)
+    {
+        pixmapView = new Pixmap(image, );
+        addChild(pixmapView);
+        pixmapView->show();
+    }
+    pixmapView->setPixmap(image);
+    setScaled(scaled);
+}*/
+/*void Pixmap::dragEnterEvent (QDragEnterEvent *e)
+{
+    QString str;
+    ParseDragEnterEvent(e,str);
+    QMessageBox::information(this,"Jeje :)", str, QMessageBox::Ok);
+}*/

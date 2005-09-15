@@ -25,6 +25,11 @@ bool MigrateFromOldVersion()
     return true;
 }
 
+void OpenWebBrowser(const QString &url)
+{
+    openWebBrowser(url);
+}
+
 KaduExtInfo::KaduExtInfo(bool migrate)
     :ExtInfo(extinfoPath("RExInfo.dat")), chatmenu(NULL), http(NULL), menuBirthday(false),menuNameDay(false)
 {

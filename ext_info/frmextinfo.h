@@ -5,9 +5,9 @@
 #include <qdialog.h>
 #include <qmessagebox.h>
 #include <qfiledialog.h>
+#include <qtextbrowser.h>
 #include "extlist.h"
 
-class QTextBrowser;
 class QVBoxLayout;
 class QHBoxLayout;
 class QGridLayout;
@@ -24,6 +24,18 @@ class QCheckBox;
 class QFrame;
 class QScrollView;
 class GetDataFromKadu;
+class ScrollImage;
+
+class TextBrowser : public QTextBrowser
+{
+    Q_OBJECT
+private slots:
+    void onLinkClicked(const QString &link);
+public:
+    TextBrowser(QWidget * parent = 0, const char * name = 0);
+    ~TextBrowser();
+    void setSource(const QString &name); // a wszystko to zeby po kliknieciu w link nie otwieralo sie w tym samym :P
+};
 
 class frmExtInfo : public QDialog
 {
@@ -36,7 +48,7 @@ public:
     QTabWidget* tabWidget;
 
     QWidget* tabGeneral;
-    QTextBrowser* tbGeneral;
+    TextBrowser* tbGeneral;
 
     QWidget* tabInfo;
     QButtonGroup* bgInfo;
@@ -96,10 +108,11 @@ public:
     QPushButton* pbRemoveImage;
     QPushButton* pbAvatar;
     QCheckBox* cbScaled;
-    QScrollView* fPhoto;
+    //QScrollView* fPhoto;
+    ScrollImage* siPhoto;
 
-    QWidget* wPhoto;
-    QLabel* plPhoto;
+    //QWidget* wPhoto;
+    //QLabel* plPhoto;
     QPushButton* pbOk;
     QPushButton* pbCancel;
     QPushButton* pbAbout;
@@ -130,12 +143,11 @@ protected:
     QGridLayout* lNet;
     QGridLayout* tabMemoLayout;
     QGridLayout* tabPhotoLayout;
-    QGridLayout* bgPhotoLayout;
-    QVBoxLayout* lPhoto;
+    QVBoxLayout* bgPhotoLayout;
     QHBoxLayout* lBottomPanel;
     QSpacerItem* sOk;
     QSpacerItem* sCancelAbout;
-    void resizeEvent ( QResizeEvent * resize);
+    //void resizeEvent ( QResizeEvent * resize);
     void scaledPhoto();
 
 protected slots:
@@ -144,9 +156,8 @@ protected slots:
 private:
     QString currentSection;
     GetDataFromKadu *kaduData;
-    //UinType currentUin;
     QString photo_path;
-    QString getPhotoPath();
+    QString getPhotoPath(const QString &photopath = "");
 
     QString infoTemplate;
 
@@ -154,14 +165,13 @@ private:
 
     bool loadInfoTemplate();
     int getCheckBoxItem(const QString& name);
-    //UinType getGGUin();
-    virtual void closeEvent ( QCloseEvent * e );
+    virtual void closeEvent (QCloseEvent * e);
 
 private slots:
     void loadSection();
     void updateSection();
     void updateInfoTab();
-    void loadImage( const QString & image );
+    void loadImage(const QString & image, bool drop = false);
 
     void cbChangeSection( const QString & name );
     void memoCharsUpdate();
@@ -174,10 +184,10 @@ private slots:
     void clickedRemoveImage();
     void clickedLoadImage();
     void clickedAvatar();
-    //void currentTabChanged(QWidget *);
     void checkScaledImage( int scaled );
     void getDataFromKadu();
     void tabCurrentChanged(QWidget *);
+    void onDragImageFile(const QString& filename);
 
 signals:
     void acceptChanges(const ExtList&);

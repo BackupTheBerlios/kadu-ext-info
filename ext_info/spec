@@ -1,4 +1,4 @@
 echo -ne "#define KADU_VERSION_" > modules/ext_info/config.h
 cat VERSION | sed "y/-./__/" >> modules/ext_info/config.h
-MODULE_SOURCES="ext_info.cpp frmextinfo.cpp extlist.cpp frmavatar.cpp frmsize.cpp ext_general.cpp"
-MODULE_MOC_HEADERS="ext_info.h frmextinfo.h frmavatar.h frmsize.h ext_general.h"
+MODULE_SOURCES="ext_info.cpp frmextinfo.cpp extlist.cpp frmavatar.cpp frmsize.cpp ext_general.cpp ext_dnd.cpp"
+MODULE_MOC_HEADERS="ext_info.h frmextinfo.h frmavatar.h frmsize.h ext_general.h ext_dnd.h"

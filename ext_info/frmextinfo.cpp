@@ -1,7 +1,7 @@
 #include "frmextinfo.h"
 #include "ext_general.h"
+#include "ext_dnd.h"
 
-#include <qtextbrowser.h>
 #include <qvariant.h>
 #include <qpushbutton.h>
 #include <qtabwidget.h>
@@ -24,6 +24,26 @@
 
 #include "frmavatar.h"
 
+TextBrowser::TextBrowser (QWidget * parent, const char * name)
+    :QTextBrowser(parent, name)
+{
+    connect(this, SIGNAL(linkClicked(const QString &)), this, SLOT(onLinkClicked(const QString &)));
+}
+
+TextBrowser::~TextBrowser()
+{
+    disconnect(this, SIGNAL(linkClicked(const QString &)), this, SLOT(onLinkClicked(const QString &)));
+}
+
+void TextBrowser::onLinkClicked(const QString &link)
+{
+    OpenWebBrowser(link);
+}
+
+void TextBrowser::setSource(const QString &)
+{   // bleee :P
+}
+
 frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
     : QDialog(parent, name, modal, fl), kaduData(new GetDataFromKadu), clicked(QMessageBox::NoButton)
 {
@@ -40,10 +60,9 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
     // Pierwszy tab (General)
     tabGeneral = new QWidget(tabWidget, "tabGeneral");
     tabGeneralLayout = new QGridLayout(tabGeneral, 1, 1, 11, 6, "tabGeneralLayout");
-    tbGeneral = new QTextBrowser(tabGeneral, "tbGeneral");
+    tbGeneral = new TextBrowser(tabGeneral, "tbGeneral");
     tabGeneralLayout->addWidget(tbGeneral, 0, 0);
     tabWidget->insertTab(tabGeneral, QString(""));
-    //tbGeneral->setText(infoTemplate + globalPath + userPath);
 
     // Tab Info
     tabInfo = new QWidget( tabWidget, "tabInfo" );
@@ -283,43 +302,29 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
     tabMemoLayout->addWidget( tlMemo, 1, 0 );
     tabWidget->insertTab( tabMemo, QString("") );
 
-    // Tab photo
+// Tab photo
     tabPhoto = new QWidget( tabWidget, "tabPhoto" );
     tabPhotoLayout = new QGridLayout( tabPhoto, 1, 1, 11, 6, "tabPhotoLayout");
 
     tlPathImage = new QLabel( tabPhoto, "tlPathImage" );
-    tlPathImage->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)5, (QSizePolicy::SizeType)0, 0, 0, tlPathImage->sizePolicy().hasHeightForWidth() ) );
-
     tabPhotoLayout->addMultiCellWidget( tlPathImage, 1, 1, 0, 1 );
 
     bgPhoto = new QButtonGroup( tabPhoto, "bgPhoto" );
-    bgPhoto->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)5, 0, 0, bgPhoto->sizePolicy().hasHeightForWidth() ) );
     bgPhoto->setFrameShape( QButtonGroup::NoFrame );
-    bgPhoto->setColumnLayout(0, Qt::Vertical );
-    bgPhoto->layout()->setSpacing( 6 );
-    bgPhoto->layout()->setMargin( 0 );
-    bgPhotoLayout = new QGridLayout( bgPhoto->layout() );
+
+    bgPhotoLayout = new QVBoxLayout(bgPhoto, 0, 6, "lPhoto");
     bgPhotoLayout->setAlignment( Qt::AlignTop );
-
-    lPhoto = new QVBoxLayout( 0, 0, 6, "lPhoto");
-
     pbLoadImage = new QPushButton( bgPhoto, "pbLoadImage" );
-    lPhoto->addWidget( pbLoadImage );
-
+    bgPhotoLayout->addWidget(pbLoadImage);
     pbRemoveImage = new QPushButton( bgPhoto, "pbRemoveImage" );
-    lPhoto->addWidget( pbRemoveImage );
-
+    bgPhotoLayout->addWidget(pbRemoveImage);
     pbAvatar = new QPushButton(bgPhoto, "pbAvatar");
-    lPhoto->addWidget(pbAvatar);
-
+    bgPhotoLayout->addWidget(pbAvatar);
     cbScaled = new QCheckBox( bgPhoto, "cbScaled" );
-    cbScaled->setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)0, (QSizePolicy::SizeType)0, 0, 0, cbScaled->sizePolicy().hasHeightForWidth() ) );
-    lPhoto->addWidget( cbScaled );
-
-    bgPhotoLayout->addLayout( lPhoto, 0, 0 );
+    bgPhotoLayout->addWidget(cbScaled);
 
     tabPhotoLayout->addWidget( bgPhoto, 0, 1 );
-
+/*
     fPhoto = new QScrollView( tabPhoto, "fPhoto" );
     fPhoto->setFrameShape( QScrollView::WinPanel );
     fPhoto->setFrameShadow( QScrollView::Sunken );
@@ -329,11 +334,14 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
 
     plPhoto = new QLabel(wPhoto, "plPhoto" );
 
-    tabPhotoLayout->addWidget( fPhoto, 0, 0 );
+    tabPhotoLayout->addWidget( fPhoto, 0, 0 );*/
+    siPhoto = new ScrollImage("", tabPhoto, "siPhoto");
+    tabPhotoLayout->addWidget(siPhoto, 0, 0);
     tabWidget->insertTab( tabPhoto, QString("") );
 
     frmExtInfoLayout->addWidget( tabWidget, 0, 0 );
 
+// Koniec tabow
     lBottomPanel = new QHBoxLayout( 0, 0, 6, "lBottomPanel");
     sOk = new QSpacerItem( 140, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
     lBottomPanel->addItem( sOk );
@@ -370,6 +378,7 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
     connect(pbAvatar, SIGNAL(clicked()), this, SLOT(clickedAvatar()));
     connect( pbGetData,SIGNAL( clicked() ),this, SLOT( getDataFromKadu()));
     connect( tabWidget,(SIGNAL(currentChanged ( QWidget * ))),this, SLOT(tabCurrentChanged ( QWidget * )));
+    connect(siPhoto, SIGNAL(onDragImageFile(const QString&)), this, SLOT(onDragImageFile(const QString&)));
 
     // tab order
     setTabOrder( tabWidget, cbSection );
@@ -801,43 +810,47 @@ void frmExtInfo::clickedRemoveSection()
     kdebugf2();
 }
 
-QString frmExtInfo::getPhotoPath()
+QString frmExtInfo::getPhotoPath(const QString &photopath)
 {
-    if (photo_path.length() && (photo_path[0] != '/'))
-        return extinfo->extinfoPath(photo_path);
+    QString pp = photopath.isEmpty() ? photo_path : photopath;
+    if (pp.length() && (pp[0] != '/'))
+        return extinfo->extinfoPath(pp);
     else
-        return photo_path;
+        return pp;
 }
 
-void frmExtInfo::loadImage( const QString & image )
+void frmExtInfo::loadImage(const QString & image, bool drop)
 {
     kdebugf();
-    photo_path = image;
-    QString img = getPhotoPath();
+    QString img = getPhotoPath(image);
 
-    if (img.length() && QFile::exists(img))
+    if (siPhoto->setImage(img))
     {
-        wPhoto->show();
-        plPhoto->setPixmap(QPixmap(img));
-        scaledPhoto();
-        tbGeneral->reload();
+        photo_path = image;
+        tlPathImage->setText(tr ("Path image: ") + photo_path);
     }
     else
     {
-        wPhoto->hide();
-        plPhoto->clear();
-        photo_path = "";
+        if (drop == false)
+        {
+            siPhoto->clearImage();
+            photo_path = "";
+            tlPathImage->setText(tr("Path image: "));
+        }
     }
-    tlPathImage->setText(tr ("Path image: ") + photo_path);
+    tbGeneral->reload();
     kdebugf2();
 }
 
+void frmExtInfo::onDragImageFile(const QString& filename)
+{
+    loadImage(filename, true);
+}
 
 void frmExtInfo::clickedRemoveImage()
 {
     loadImage("");
 }
-
 
 void frmExtInfo::clickedLoadImage()
 {
@@ -865,16 +878,6 @@ QString encodeName(const QString &name)
 
 void frmExtInfo::clickedAvatar()
 {
-    // A kurwa nie iwem co z tym :/
-    /*srand(time(NULL));
-    unsigned int name = (rand() << 16) + rand();
-    QString n;
-    if (photo_path.find(userPath) == -1)
-    {
-        n = userPath + QString("%1.jpg").arg(name);
-    }
-    else
-        n = photo_pathl*/
     QString n = encodeName(currentSection) + QString(".jpg");
     frmAvatar frmavatar(extinfo->extinfoPath(n), getPhotoPath(), this);
     if (frmavatar.exec() == QDialog::Accepted)
@@ -884,15 +887,6 @@ void frmExtInfo::clickedAvatar()
 void frmExtInfo::checkScaledImage(int scaled)
 {
     kdebugf();
-    plPhoto->setScaledContents(QButton::On == scaled);
-    scaledPhoto();
-    kdebugf2();
-}
-
-void frmExtInfo::resizeEvent ( QResizeEvent * resize)
-{
-    kdebugf();
-    QDialog::resizeEvent(resize);
     scaledPhoto();
     kdebugf2();
 }
@@ -900,29 +894,7 @@ void frmExtInfo::resizeEvent ( QResizeEvent * resize)
 void frmExtInfo::scaledPhoto()
 {
     kdebugf();
-    if (photo_path.length() == 0)
-        return;
-    plPhoto->setScaledContents(cbScaled->isChecked());
-    if (plPhoto->hasScaledContents())
-    {
-        fPhoto->setContentsPos(0,0);
-        fPhoto->setVScrollBarMode(QScrollView::AlwaysOff);
-        fPhoto->setHScrollBarMode(QScrollView::AlwaysOff);
-        float scaleW = float(fPhoto->visibleWidth()) / float(plPhoto->pixmap()->width());
-        float scaleH = float(fPhoto->visibleHeight()) / float(plPhoto->pixmap()->height());
-        float scale = scaleW > scaleH ? scaleH : scaleW;
-        QRect rect(0,0,int(float(plPhoto->pixmap()->width()) * scale), int(float(plPhoto->pixmap()->height()) * scale));
-        wPhoto->setGeometry(rect);
-        plPhoto->setGeometry(rect);
-    }
-    else
-    {
-        fPhoto->setVScrollBarMode(QScrollView::Auto);
-        fPhoto->setHScrollBarMode(QScrollView::Auto);
-        QRect rect(0,0,plPhoto->pixmap()->width(),plPhoto->pixmap()->height());
-        wPhoto->setGeometry(rect);
-        plPhoto->setGeometry(rect);
-    }
+    siPhoto->setScaled(cbScaled->isChecked());
     kdebugf2();
 }
 
