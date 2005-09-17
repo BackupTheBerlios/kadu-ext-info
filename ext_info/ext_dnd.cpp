@@ -55,6 +55,7 @@ bool ScrollImage::setImage(const QString &imagepath)
 
 void ScrollImage::setImage(const QPixmap &image)
 {
+    setContentsPos(0,0);
     if (pixmapView == NULL)
     {
         pixmapView = new QLabel(viewport(), "plPhoto");
@@ -68,6 +69,7 @@ void ScrollImage::setImage(const QPixmap &image)
 
 void ScrollImage::setPixmapViewport(QLabel* v)
 {
+    setContentsPos(0,0);
     if (pixmapView)
         clearImage();
     pixmapView = v;

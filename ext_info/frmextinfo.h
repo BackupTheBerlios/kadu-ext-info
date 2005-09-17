@@ -51,25 +51,20 @@ public:
     TextBrowser* tbGeneral;
 
     QWidget* tabInfo;
-    QButtonGroup* bgInfo;
-    QLineEdit* leBirthDay;
-    QLineEdit* lePhone;
-    QLabel* tlPhone;
-    QComboBox* cbSection;
-    QLabel* tlSection;
-    QLabel* tlBirthDay;
-    QLineEdit* leLastName;
+    QLabel* tlNickname;
     QLineEdit* leNickname;
     QLabel* tlFirstName;
-    QLabel* tlNameDay;
-    QLabel* tlNickname;
-    QLineEdit* leMobile;
-    QLabel* tlMobile;
     QLineEdit* leFirstName;
-    QLineEdit* leNameDay;
     QLabel* tlLastName;
-    QLabel* tlInterests;
-    QLineEdit* leInterests;
+    QLineEdit* leLastName;
+    QLabel* tlNameDay;
+    QLineEdit* leNameDay;
+    QLabel* tlBirthDay;
+    QLineEdit* leBirthDay;
+    QLabel* tlPhone;
+    QLineEdit* lePhone;
+    QLabel* tlMobile;
+    QLineEdit* leMobile;
     QPushButton* pbRemoveSection;
     QPushButton* pbGetData;
     QButtonGroup* bgAdress;
@@ -77,7 +72,12 @@ public:
     QLabel* tlStreet;
     QLabel* tlCity;
     QLineEdit* leCity;
-
+    QLabel* tlInterests;
+    QLineEdit* leInterests;
+ /*
+    QButtonGroup* bgInfo;
+    QLabel* tlSection;
+ */
     QWidget* tabNet;
     QButtonGroup* bgNet;
     QLineEdit* leSecondGG;
@@ -116,13 +116,14 @@ public:
     QPushButton* pbOk;
     QPushButton* pbCancel;
     QPushButton* pbAbout;
+    QComboBox* cbSection;
 
     ExtList extlist;
 
 public slots:
-    void show(const ExtList &src, const QString & sectionName );
-    void renameSection(const QString& oldName, const QString& newName);
-    void setCurrentSection(const QString& sectionName);
+    void show(const ExtList &src, const QString & sectionName ); // wysietlenie okna z otwarciem sekcji
+    void renameSection(const QString& oldName, const QString& newName); // zmiana nazwy sekcji
+    void setCurrentSection(const QString& sectionName); // ustawienie sekcji na hama
 
 protected:
     QGridLayout* frmExtInfoLayout;
@@ -130,14 +131,20 @@ protected:
     QGridLayout* tabGeneralLayout;
 
     QGridLayout* tabInfoLayout;
+    QGridLayout* lInterests;
+    QGridLayout* bgAdressLayout;
+    QGridLayout *tabInfoLeftLayout;
+    QGridLayout *tabInfoRightLayout;
+    QSpacerItem* sTabInfoButtons;
+ /*
     QGridLayout* bgInfoLayout;
     QGridLayout* lGeneral;
-    QGridLayout* lInterests;
     QGridLayout* layout18;
     QGridLayout* lSectionButtons;
     QSpacerItem* sRemoveSection;
     QSpacerItem* sGetData;
-    QGridLayout* bgAdressLayout;
+ */
+
     QGridLayout* tabNetLayout;
     QGridLayout* bgNetLayout;
     QGridLayout* lNet;
@@ -157,7 +164,8 @@ private:
     QString currentSection;
     GetDataFromKadu *kaduData;
     QString photo_path;
-    QString getPhotoPath(const QString &photopath = "");
+    QString getPhotoPath();
+    QString getPhotoPath(const QString &photopath);
 
     QString infoTemplate;
 
@@ -168,12 +176,14 @@ private:
     virtual void closeEvent (QCloseEvent * e);
 
 private slots:
-    void loadSection();
-    void updateSection();
+    void loadSection(const QString &name);
+    void saveSection(const QString &name);
+
     void updateInfoTab();
     void loadImage(const QString & image, bool drop = false);
 
-    void cbChangeSection( const QString & name );
+    void cbChangeSection(const QString &name);  // update sekcji przez ComboBox
+
     void memoCharsUpdate();
     void testFormatBirthday();
     void testFormatNameday();

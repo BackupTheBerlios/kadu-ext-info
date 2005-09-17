@@ -13,7 +13,20 @@
     nkg@poczta.onet.pl
     http://www.kadu.net/~dzwiedziu/ext_info.php
 
+    TODO: 2.0
+            - Po klikniêciu na nr GG w oknie informacji ma siê otwieraæ okno rozmowy z nim
+            - Po klikniêciu na adres e-mail ma siê otwieraæ ustawiony program pocztowy
+            - Stworzyæ osobny tab na informacje o programie, a przycisk "Informacje" wyrzuciæ
+            - Porobiæ jakie¶ wskazówki dla u¿ytkownika
+
     ChangeLog:
+
+        [v2.0 beta 3]
+            * Poprawki w podgl±dzie zdjêcia i oknie edycji avataru.
+            * Przeniesienie kontrolki woboru sekcji poza zak³adki
+            * Uspranienie funkcji prztwarzaj±cej szablon prezentacji
+            * Poprawienie domy¶lnego szablonu prezentacji, informacja o rzeczach
+              które nie zosta³y wpisane nie jest w ogóle wy¶wietlana.
 
         [v2.0 beta 2]
             * Kolejne po¿±dki w kodzie

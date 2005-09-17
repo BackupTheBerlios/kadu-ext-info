@@ -4,28 +4,54 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf8">
   <title>ext_info</title>
 </head>
-<!-- bgcolor="darkgray" text="yellow"-->
-<body>
-  <h1 align="center">{nickorggnick}</h1>
-  <p><img src="{avatar}" alt="{nick}" align="left" {avatar_width}="100">&nbsp;<b>Imię i nazwisko:</b> {first_name} {last_name}<br>
-  <b>Nazwa na liście kontaktów:</b> {ggnick}<br>
-  <b>GaduGadu: </b> {gg}<br>
-  <b>Telefon komórkowy:</b> {mobile}<br>
-  <b>Zainteresowania:</b> {interests}<br>
-  <b>Data urodzenia:</b> {birthday}<br>
-  <b>Data imienin:</b> {name_day}<br>
-  <b>e-mail (główny):</b> {email1}<br>
-  <b>Strona internetowa: </b> <a href="{www}">{www}</a><br>
-  <b>Telefon domowy:</b> {phone}<br>
-  <b>Adres domowy:</b><br>
-  {street}<br>
-  {city}<br>
-  <b>e-mail (dodatkowy):</b> {email2}<br>
-  <b>IRC Nick:</b> {irc}<br>
-  <b>WP Kontakt:</b> {wp}<br>
-  <b>ICQ UIN</b> {icq}<br>
-  <b>Tlen Nick:</b> {tlen}<br>
-  <b>Drugi numer GG:</b> {alt_gg}</p>
-  <p>{memo}</p>
+<body background="{module_data_path}info_bg.jpg" bgcolor="#f9f9f9">
+<table width="100%">
+  <tr>
+    <td width="100%" valign="middle">
+      <h2 align="center">{nickorggnick}</h2>
+      <p><b>Name:</b> {first_name} {last_name}<br>
+      {Tggnick}<b>GG name:</b> {ggnick}<br>{/Tggnick}
+      {Tgg}<b>GaduGadu: </b> <a href="gg:{gg}">{gg}</a><br>{/Tgg}
+      {Tmobile}<b>Mobile:</b> <a href="sms:{mobile}">{mobile}</a><br>{/Tmobile}
+      {Tinterests}<b>Hobby:</b> {interests}<br>{/Tinterests}
+      {Tbirthday}<b>Birthday:</b> {birthday}<br>{/Tbirthday}
+      {Tname_day}<b>Nameday:</b> {name_day}{/Tname_day}</p>
+    </td>
+    {Tavatar}<td valign="middle"><img src="{avatar}" alt="{nick}" {avatar_width}="100"></td>{/Tavatar}
+  </tr>
+</table>
+<table>
+  <tr>
+    <td>
+      <p>{Temail1}<b>e-mail (first):</b> <a href="mailto:{email1}">{email1}</a><br>{/Temail1}
+      {Temail2}<b>e-mail (second):</b> <a href="mailto:{email2}">{email2}</a><br>{/Temail2}
+      {Twww}<b>Web: </b> <a href="{www}">{www}</a><br>{/Twww}
+      {Tphone}<b>Phone:</b> {phone}<br>{/Tphone}
+      {Tirc}<b>IRC Nick:</b> {irc}<br>{/Tirc}
+      {Twp}<b>WP Kontakt:</b> {wp}<br>{/Twp}
+      {Ticq}<b>ICQ UIN</b> {icq}<br>{/Ticq}
+      {Ttlen}<b>Tlen Nick:</b> {tlen}<br>{/Ttlen}
+      {Talt_gg}<b>Second GG uin:</b> <a href="gg:{alt_gg}">{alt_gg}</a>{/Talt_gg}</p>
+    </td>
+  </tr>
+</table>
+{Thomeadress}
+<table>
+  <tr>
+    <td><b>Adress:</b></td>
+    <td>{street}<br>
+    {city}</td>
+  </tr>
+</table>
+{/Thomeadress}
+{Tmemo}
+<table>
+  <tr>
+    <td>
+      <b>Note: </b><p>{memo}</p>
+    </td>
+  </tr>
+</table>
+{/Tmemo}
 </body>
 </html>

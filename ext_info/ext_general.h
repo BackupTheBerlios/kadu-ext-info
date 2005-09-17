@@ -1,8 +1,8 @@
 #ifndef ext_generalH
 #define ext_generalH
 
-#define EXTINFO_VERSION "2.0 beta 2"
-#define EXTINFO_PACKED_VERSION "020000b02"
+#define EXTINFO_VERSION "2.0 beta 3"
+#define EXTINFO_PACKED_VERSION "020000b03"
 #define EXTINFO_INFOTEMPLATE "info_template_en.html"
 #define MODULE_EXTINFO_VERSION 2.0
 
@@ -80,8 +80,8 @@ private:
 public:
     KaduExtInfo(bool migrate = false);  // migrate = true: migracja ze starej wersji
     ~KaduExtInfo();
-    virtual QString moduleDataPath(const QString &filename);
-    virtual QString extinfoPath(const QString &filename);
+    virtual QString moduleDataPath(const QString &filename = "");
+    virtual QString extinfoPath(const QString &filename = "");
 
 
 private slots:

@@ -21,8 +21,12 @@
 #include <qfile.h>
 #include <qtextcodec.h>
 #include <qdir.h>
+#include <qregexp.h>
 
 #include "frmavatar.h"
+
+#include <iostream>
+using namespace std;
 
 TextBrowser::TextBrowser (QWidget * parent, const char * name)
     :QTextBrowser(parent, name)
@@ -65,6 +69,127 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
     tabWidget->insertTab(tabGeneral, QString(""));
 
     // Tab Info
+    tabInfo = new QWidget(tabWidget, "tabInfo" );
+    tabInfoLayout = new QGridLayout(tabInfo, 2, 2, 11, 6, "tabInfoLayout");
+    tabInfoLeftLayout = new QGridLayout(0, 8, 2, 0, 6, "tabInfoLeftLayout");
+    tabInfoLayout->addLayout(tabInfoLeftLayout, 0, 0);
+
+    leNickname = new QLineEdit(tabInfo, "leNickname");
+    tabInfoLeftLayout->addWidget(leNickname, 1, 1);
+    tlNickname = new QLabel(tabInfo, "tlNickname");
+    tabInfoLeftLayout->addWidget(tlNickname, 1, 0);
+
+    leFirstName = new QLineEdit(tabInfo, "leFirstName");
+    tabInfoLeftLayout->addWidget(leFirstName, 2, 1);
+    tlFirstName = new QLabel(tabInfo, "tlFirstName");
+    tabInfoLeftLayout->addWidget(tlFirstName, 2, 0);
+
+    leLastName = new QLineEdit(tabInfo, "leLastName");
+    tabInfoLeftLayout->addWidget(leLastName, 3, 1);
+    tlLastName = new QLabel(tabInfo, "tlLastName");
+    tabInfoLeftLayout->addWidget(tlLastName, 3, 0);
+
+    leNameDay = new QLineEdit(tabInfo, "leNameDay");
+    tabInfoLeftLayout->addWidget(leNameDay, 4, 1);
+    tlNameDay = new QLabel(tabInfo, "tlNameDay");
+    tabInfoLeftLayout->addWidget(tlNameDay, 4, 0);
+
+    leBirthDay = new QLineEdit(tabInfo, "leBirthDay");
+    tabInfoLeftLayout->addWidget(leBirthDay, 5, 1);
+    tlBirthDay = new QLabel(tabInfo, "tlBirthDay");
+    tabInfoLeftLayout->addWidget(tlBirthDay, 5, 0);
+
+    lePhone = new QLineEdit(tabInfo, "lePhone");
+    tabInfoLeftLayout->addWidget(lePhone, 6, 1);
+    tlPhone = new QLabel(tabInfo, "tlPhone");
+    tabInfoLeftLayout->addWidget(tlPhone, 6, 0);
+
+    leMobile = new QLineEdit(tabInfo, "leMobile");
+    tabInfoLeftLayout->addWidget(leMobile, 7, 1);
+    tlMobile = new QLabel(tabInfo, "tlMobile");
+    tabInfoLeftLayout->addWidget(tlMobile, 7, 0);
+
+
+
+
+    tabInfoRightLayout = new QGridLayout(NULL, 5, 2, 0, 6, "tabInfoRightLayout");
+    tabInfoLayout->addLayout(tabInfoRightLayout, 0, 1);
+
+    pbRemoveSection = new QPushButton(tabInfo, "pbRemoveSection");
+    tabInfoRightLayout->addWidget(pbRemoveSection, 0, 0);
+    pbGetData = new QPushButton(tabInfo, "pbGetData");
+    tabInfoRightLayout->addWidget(pbGetData, 1, 0);
+    sTabInfoButtons = new QSpacerItem( 31, 21, QSizePolicy::Expanding, QSizePolicy::Minimum );
+    tabInfoRightLayout->addMultiCell(sTabInfoButtons, 0, 1, 1, 1);
+
+    bgAdress = new QButtonGroup(tabInfo, "bgAdress");
+    tabInfoRightLayout->addMultiCellWidget(bgAdress, 3, 3, 0, 1);
+    bgAdress->setColumnLayout(0, Qt::Vertical);
+    bgAdress->layout()->setSpacing(6);
+    bgAdress->layout()->setMargin(11);
+    bgAdressLayout = new QGridLayout( bgAdress->layout() );
+
+    leStreet = new QLineEdit(bgAdress, "leStreet");
+    bgAdressLayout->addWidget(leStreet, 0, 1);
+    tlStreet = new QLabel(bgAdress, "tlStreet");
+    bgAdressLayout->addWidget(tlStreet, 0, 0);
+
+    leCity = new QLineEdit(bgAdress, "leCity");
+    bgAdressLayout->addWidget(leCity, 1, 1);
+    tlCity = new QLabel(bgAdress, "tlCity");
+    bgAdressLayout->addWidget(tlCity, 1, 0);
+
+
+
+    lInterests = new QGridLayout(NULL, 2, 1, 0, 0, "lInterests");
+    tabInfoRightLayout->addMultiCell(lInterests, 4, 4, 0, 1);
+    leInterests = new QLineEdit(tabInfo, "leInterests");
+    lInterests->addWidget(leInterests, 1, 0);
+    tlInterests = new QLabel(tabInfo, "tlInterests");
+    tlInterests->setAlignment(int(QLabel::AlignBottom));
+    lInterests->addWidget(tlInterests, 0, 0);
+    tabWidget->insertTab(tabInfo, QString(""));
+
+
+
+/*
+    bgInfo = new QButtonGroup( tabInfo, "bgInfo" );
+    bgInfo->setFrameShape( QButtonGroup::NoFrame );
+    bgInfo->setColumnLayout(0, Qt::Vertical );
+    bgInfo->layout()->setSpacing( 6 );
+    bgInfo->layout()->setMargin( 11 );
+    bgInfoLayout = new QGridLayout( bgInfo->layout() );
+    bgInfoLayout->setAlignment( Qt::AlignTop );
+
+    lGeneral = new QGridLayout( 0, 1, 1, 0, 6, "lGeneral");
+
+
+    bgInfoLayout->addMultiCellLayout( lGeneral, 0, 1, 0, 0 );
+
+
+
+
+    bgInfoLayout->addLayout( lInterests, 1, 1 );
+
+    layout18 = new QGridLayout( 0, 1, 1, 0, 6, "layout18");
+
+    lSectionButtons = new QGridLayout( 0, 1, 1, 0, 6, "lSectionButtons");
+    sRemoveSection = new QSpacerItem( 31, 21, QSizePolicy::Expanding, QSizePolicy::Minimum );
+    lSectionButtons->addItem( sRemoveSection, 1, 1 );
+
+    sGetData = new QSpacerItem( 31, 21, QSizePolicy::Expanding, QSizePolicy::Minimum );
+    lSectionButtons->addItem( sGetData, 0, 1 );
+
+
+    layout18->addLayout( lSectionButtons, 0, 0 );
+
+
+    bgInfoLayout->addLayout( layout18, 0, 1 );
+
+    tabInfoLayout->addMultiCellWidget(bgInfo, 1, 1, 0, 1);*/
+
+
+ /*
     tabInfo = new QWidget( tabWidget, "tabInfo" );
     tabInfoLayout = new QGridLayout( tabInfo, 1, 1, 0, 6, "tabInfoLayout");
 
@@ -89,10 +214,6 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
     tlPhone = new QLabel( bgInfo, "tlPhone" );
 
     lGeneral->addWidget( tlPhone, 6, 0 );
-
-    cbSection = new QComboBox( FALSE, bgInfo, "cbSection" );
-
-    lGeneral->addWidget( cbSection, 0, 1 );
 
     tlSection = new QLabel( bgInfo, "tlSection" );
 
@@ -206,7 +327,9 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
 
     tabInfoLayout->addWidget( bgInfo, 0, 0 );
     tabWidget->insertTab( tabInfo, QString("") );
+// */
 
+// Tab net!!!
     tabNet = new QWidget( tabWidget, "tabNet" );
     tabNetLayout = new QGridLayout( tabNet, 1, 1, 0, 6, "tabNetLayout");
 
@@ -307,6 +430,7 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
     tabPhotoLayout = new QGridLayout( tabPhoto, 1, 1, 11, 6, "tabPhotoLayout");
 
     tlPathImage = new QLabel( tabPhoto, "tlPathImage" );
+    tlPathImage->setSizePolicy(QSizePolicy(QSizePolicy::Ignored, QSizePolicy::Maximum, true));
     tabPhotoLayout->addMultiCellWidget( tlPathImage, 1, 1, 0, 1 );
 
     bgPhoto = new QButtonGroup( tabPhoto, "bgPhoto" );
@@ -343,6 +467,9 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
 
 // Koniec tabow
     lBottomPanel = new QHBoxLayout( 0, 0, 6, "lBottomPanel");
+    cbSection = new QComboBox(FALSE, this, "cbSection");
+    lBottomPanel->addWidget(cbSection);
+
     sOk = new QSpacerItem( 140, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
     lBottomPanel->addItem( sOk );
 
@@ -412,7 +539,7 @@ frmExtInfo::frmExtInfo(QWidget* parent, const char* name, bool modal, WFlags fl)
 
     // buddies
     tlPhone->setBuddy( lePhone );
-    tlSection->setBuddy( cbSection );
+    //tlSection->setBuddy( cbSection );
     tlBirthDay->setBuddy( leBirthDay );
     tlFirstName->setBuddy( leFirstName );
     tlNameDay->setBuddy( leNameDay );
@@ -473,7 +600,7 @@ void frmExtInfo::closeEvent ( QCloseEvent * e )
 {
     QString modifieds;
     if (clicked == QMessageBox::NoButton)
-        updateSection();
+        saveSection(currentSection);
     if (clicked != QMessageBox::Ok)
     {
         for (ExtList::iterator i = extlist.begin(); i != extlist.end(); i++)
@@ -511,11 +638,11 @@ void frmExtInfo::languageChange()
     tabWidget->changeTab(tabGeneral, tr("Info"));
     tabWidget->changeTab(tabInfo, tr("General"));
 
-    bgInfo->setTitle( QString::null );
+    //bgInfo->setTitle( QString::null );
     QToolTip::add( leBirthDay, tr( "Format: dd.mm.yyyy" ) );
     QToolTip::add( lePhone, tr( "Phone number" ) );
     tlPhone->setText( tr( "Phone:" ) );
-    tlSection->setText( tr( "Section:" ) );
+    //tlSection->setText( tr( "Section:" ) );
     tlBirthDay->setText( tr( "Birthday:" ) );
     tlFirstName->setText( tr( "First name:" ) );
     tlNameDay->setText( tr( "Name day:" ) );
@@ -558,30 +685,30 @@ void frmExtInfo::languageChange()
     kdebugf2();
 }
 
-void frmExtInfo::loadSection()
+void frmExtInfo::loadSection(const QString &name)
 {
     kdebugf();
-    leNickname->setText(extlist[currentSection].nickname);
-    leLastName->setText(extlist[currentSection].last_name);
-    leFirstName->setText(extlist[currentSection].first_name);
-    leBirthDay->setText(extlist[currentSection].birthday);
-    leNameDay->setText(extlist[currentSection].name_day);
-    lePhone->setText(extlist[currentSection].phone);
-    leMobile->setText(extlist[currentSection].mobile);
-    leCity->setText(extlist[currentSection].city);
-    leStreet->setText(extlist[currentSection].street);
-    leInterests->setText(extlist[currentSection].interests);
-    leEmail1->setText(extlist[currentSection].email[0]);
-    leEmail2->setText(extlist[currentSection].email[1]);
-    leWWW->setText(extlist[currentSection].www);
-    leIRC->setText(extlist[currentSection].irc);
-    leWP->setText(extlist[currentSection].wp);
-    leICQ->setText(extlist[currentSection].icq);
-    leTlen->setText(extlist[currentSection].tlen);
-    leSecondGG->setText(extlist[currentSection].alt_gg);
-    teMemo->setText(extlist[currentSection].memo);
-    cbScaled->setChecked(extlist[currentSection].photo_scaled);
-    loadImage(extlist[currentSection].photo_path);
+    leNickname->setText(extlist[name].nickname);
+    leLastName->setText(extlist[name].last_name);
+    leFirstName->setText(extlist[name].first_name);
+    leBirthDay->setText(extlist[name].birthday);
+    leNameDay->setText(extlist[name].name_day);
+    lePhone->setText(extlist[name].phone);
+    leMobile->setText(extlist[name].mobile);
+    leCity->setText(extlist[name].city);
+    leStreet->setText(extlist[name].street);
+    leInterests->setText(extlist[name].interests);
+    leEmail1->setText(extlist[name].email[0]);
+    leEmail2->setText(extlist[name].email[1]);
+    leWWW->setText(extlist[name].www);
+    leIRC->setText(extlist[name].irc);
+    leWP->setText(extlist[name].wp);
+    leICQ->setText(extlist[name].icq);
+    leTlen->setText(extlist[name].tlen);
+    leSecondGG->setText(extlist[name].alt_gg);
+    teMemo->setText(extlist[name].memo);
+    cbScaled->setChecked(extlist[name].photo_scaled);
+    loadImage(extlist[name].photo_path);
     //currentUin = getGGUin();
 
     updateInfoTab();
@@ -589,98 +716,83 @@ void frmExtInfo::loadSection()
     kdebugf2();
 }
 
+void frmExtInfo::saveSection(const QString &name)
+{
+    kdebugf();
+    if (name.isEmpty())
+        return;
+    ExtListElement old = extlist[name];
+    extlist[name].nickname = leNickname->text();
+    extlist[name].last_name = leLastName->text();
+    extlist[name].first_name = leFirstName->text();
+    extlist[name].birthday = leBirthDay->text();
+    extlist[name].name_day = leNameDay->text();
+    extlist[name].phone = lePhone->text();
+    extlist[name].mobile = leMobile->text();
+    extlist[name].city = leCity->text();
+    extlist[name].street = leStreet->text();
+    extlist[name].interests = leInterests->text();
+    extlist[name].email[0] = leEmail1->text();
+    extlist[name].email[1] = leEmail2->text();
+    extlist[name].www = leWWW->text();
+    extlist[name].irc = leIRC->text();
+    extlist[name].wp = leWP->text();
+    extlist[name].icq = leICQ->text();
+    extlist[name].tlen = leTlen->text();
+    extlist[name].alt_gg = leSecondGG->text();
+    extlist[name].memo = teMemo->text();
+    extlist[name].photo_path = photo_path;
+    extlist[name].photo_scaled = cbScaled->isChecked();
+    if (old != extlist[name])
+    {
+        extlist[name].modified = true;
+    }
+    kdebugf2();
+}
+
 void frmExtInfo::updateInfoTab()
 {
     QString info = infoTemplate;
-/*
-    info.replace("{nick}", extlist[currentSection].nickname);
-    info.replace("{avatar}", extlist[currentSection].photo_path);
-    info.replace("{first_name}", extlist[currentSection].first_name);
-    info.replace("{last_name}", extlist[currentSection].last_name);
-    info.replace("{street}", extlist[currentSection].street);
-    info.replace("{city}", extlist[currentSection].city);
-    info.replace("{birthday}", extlist[currentSection].birthday);
-    info.replace("{name_day}", extlist[currentSection].name_day);
-    info.replace("{phone}", extlist[currentSection].phone);
-    info.replace("{mobile}", extlist[currentSection].mobile);
-    info.replace("{interests}", extlist[currentSection].interests);
-    info.replace("{email0}", extlist[currentSection].email[0]);
-    info.replace("{email1}", extlist[currentSection].email[1]);
-    info.replace("{www}", extlist[currentSection].www);
-    info.replace("{irc}", extlist[currentSection].irc);
-    info.replace("{wp}", extlist[currentSection].wp);
-    info.replace("{tlen}", extlist[currentSection].tlen);
-    info.replace("{alt_gg}", extlist[currentSection].alt_gg);
-    info.replace("{memo}", extlist[currentSection].memo);
-*/
-    info.replace("{gg}", kaduData->found ? QString("%1").arg(kaduData->UIN) : "");
-    info.replace("{ggnick}", currentSection);
-    info.replace("{nickorggnick}", leNickname->text().length() ? leNickname->text() : currentSection);
-    info.replace("{nick}", leNickname->text());
-    info.replace("{avatar}", getPhotoPath());
+#define REPLACE(tag, txt) info.replace("{T"tag"}",txt.isEmpty() ? "<!--" : "");\
+                          info.replace("{/T"tag"}",txt.isEmpty() ? "-->" : "");\
+                          info.replace("{"tag"}", txt)
+    info.replace("{extinfo_path}",extinfo->extinfoPath());
+    info.replace("{module_data_path}",extinfo->moduleDataPath());
+    REPLACE("gg", (kaduData->found ? QString("%1").arg(kaduData->UIN) : QString("")));
+    REPLACE("ggnick", currentSection);
+    REPLACE("nickorggnick", (leNickname->text().length() ? leNickname->text() : currentSection));
+    REPLACE("nick", leNickname->text());
+    REPLACE("avatar", getPhotoPath());
     info.replace("{avatar_width}", (photo_path[0] == '/') ? "width" : "none");
-    info.replace("{first_name}", leFirstName->text());
-    info.replace("{last_name}", leLastName->text());
-    info.replace("{street}", leStreet->text());
-    info.replace("{city}", leCity->text());
-    info.replace("{birthday}", leBirthDay->text());
-    info.replace("{name_day}", leNameDay->text());
-    info.replace("{phone}", lePhone->text());
-    info.replace("{mobile}", leMobile->text());
-    info.replace("{interests}", leInterests->text());
-    info.replace("{email1}", leEmail1->text());
-    info.replace("{email2}", leEmail2->text());
-    info.replace("{www}", leWWW->text());
-    info.replace("{irc}", leIRC->text());
-    info.replace("{icq}", leICQ->text());
-    info.replace("{wp}", leWP->text());
-    info.replace("{tlen}", leTlen->text());
-    info.replace("{alt_gg}", leSecondGG->text());
-    info.replace("{memo}", QString(teMemo->text()).replace("\n","<br>"));
+    REPLACE("first_name", leFirstName->text());
+    REPLACE("last_name", leLastName->text());
+    REPLACE("street", leStreet->text());
+    REPLACE("city", leCity->text());
+    REPLACE("homeadress", QString(leStreet->text() + leCity->text()));
+    REPLACE("birthday", leBirthDay->text());
+    REPLACE("name_day", leNameDay->text());
+    REPLACE("phone", lePhone->text());
+    REPLACE("mobile", leMobile->text());
+    REPLACE("interests", leInterests->text());
+    REPLACE("email1", leEmail1->text());
+    REPLACE("email2", leEmail2->text());
+    REPLACE("www", leWWW->text());
+    REPLACE("irc", leIRC->text());
+    REPLACE("icq", leICQ->text());
+    REPLACE("wp", leWP->text());
+    REPLACE("tlen", leTlen->text());
+    REPLACE("alt_gg", leSecondGG->text());
+    REPLACE("memo", QString(teMemo->text()).replace("\n","<br>"));
     tbGeneral->setText(info);
 }
 
 void frmExtInfo::cbChangeSection( const QString &name )
 {
     kdebugf();
-    updateSection();
+    saveSection(currentSection);
     currentSection = name;
     kaduData->load(name);
-    loadSection();
-    kdebugf2();
-}
-
-void frmExtInfo::updateSection()
-{
-    kdebugf();
-    if (currentSection == "")
-        return;
-    ExtListElement old = extlist[currentSection];
-    extlist[currentSection].nickname = leNickname->text();
-    extlist[currentSection].last_name = leLastName->text();
-    extlist[currentSection].first_name = leFirstName->text();
-    extlist[currentSection].birthday = leBirthDay->text();
-    extlist[currentSection].name_day = leNameDay->text();
-    extlist[currentSection].phone = lePhone->text();
-    extlist[currentSection].mobile = leMobile->text();
-    extlist[currentSection].city = leCity->text();
-    extlist[currentSection].street = leStreet->text();
-    extlist[currentSection].interests = leInterests->text();
-    extlist[currentSection].email[0] = leEmail1->text();
-    extlist[currentSection].email[1] = leEmail2->text();
-    extlist[currentSection].www = leWWW->text();
-    extlist[currentSection].irc = leIRC->text();
-    extlist[currentSection].wp = leWP->text();
-    extlist[currentSection].icq = leICQ->text();
-    extlist[currentSection].tlen = leTlen->text();
-    extlist[currentSection].alt_gg = leSecondGG->text();
-    extlist[currentSection].memo = teMemo->text();
-    extlist[currentSection].photo_path = photo_path;
-    extlist[currentSection].photo_scaled = cbScaled->isChecked();
-    if (old != extlist[currentSection])
-    {
-        extlist[currentSection].modified = true;
-    }
+    loadSection(name);
     kdebugf2();
 }
 
@@ -734,7 +846,7 @@ void frmExtInfo::clickedOk()
 {
     kdebugf();
     clicked = QMessageBox::Ok;
-    updateSection();
+    saveSection(currentSection);
     emit(acceptChanges(extlist));
     close();
     kdebugf2();
@@ -756,7 +868,7 @@ void frmExtInfo::show(const ExtList &src, const QString & sectionName )
         }
     }
     else
-        updateSection();
+        saveSection(currentSection);
     setCurrentSection(sectionName);
     if (isHidden())
         QDialog::show();
@@ -775,7 +887,7 @@ void frmExtInfo::renameSection(const QString& oldName, const QString& newName)
     if (currentSection == oldName)
     {
         currentSection = newName;
-        updateSection();
+        saveSection(newName);
     }
     cbSection->removeItem(getCheckBoxItem(oldName));
     cbSection->insertItem(newName);
@@ -810,13 +922,17 @@ void frmExtInfo::clickedRemoveSection()
     kdebugf2();
 }
 
+QString frmExtInfo::getPhotoPath()
+{
+    return getPhotoPath(photo_path);
+}
+
 QString frmExtInfo::getPhotoPath(const QString &photopath)
 {
-    QString pp = photopath.isEmpty() ? photo_path : photopath;
-    if (pp.length() && (pp[0] != '/'))
-        return extinfo->extinfoPath(pp);
+    if (photopath.length() && (photopath[0] != '/'))
+        return extinfo->extinfoPath(photopath);
     else
-        return pp;
+        return photopath;
 }
 
 void frmExtInfo::loadImage(const QString & image, bool drop)
@@ -871,7 +987,7 @@ QString encodeName(const QString &name)
         if (((name[i] >= 'a') && (name[i] <= 'z')) || ((name[i] >= 'A') && (name[i] <= 'Z')) || ((name[i] >= '0') && (name[i] <= '9')))
             out += name[i];
         else
-            out += QString("_%1").arg(int(name[i]),2,16);
+            out += QString("").sprintf("_%02x",int(uchar((name.local8Bit())[i])));
     }
     return out;
 }
