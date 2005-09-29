@@ -29,6 +29,7 @@ protected:
     bool showButton;            // poka¿ przycisk ext_info w oknie rozmowy
     bool checkUpdateStable;     // sprawdzaj czy jest nowa wersja stablina ext_info
     bool checkUpdateUnstable;   //      ,,           ,,           rozwojowa    ,,
+    QString mailProgram;        // domy¶lny program pocztowy
 
 
     frmExtInfo *frmextinfo;

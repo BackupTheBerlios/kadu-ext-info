@@ -3,6 +3,7 @@
 #include "misc.h"
 #include "config_dialog.h"
 #include "userbox.h"
+#include "modules/sms/sms.h"
 #if defined(KADU_0_5_0)
 #include "chat_manager.h"
 #include "icons_manager.h"
@@ -15,6 +16,8 @@
 #else
 #include "../hints/hint_manager.h"
 #endif
+
+#include <qprocess.h>
 
 bool MigrateFromOldVersion()
 {
@@ -91,6 +94,7 @@ void KaduExtInfo::RegisterInConfigDialog(bool migrate)
     ConfigDialog::addCheckBox(config, "ExtInfo", "ExtInfo", QT_TRANSLATE_NOOP("@default", "Show ext_info button in chat windows"), "button", migrate ? config_file.readBoolEntry("ExtInfo","button",true) : TRUE);
     ConfigDialog::addCheckBox(config, "ExtInfo", "ExtInfo", QT_TRANSLATE_NOOP("@default", "Check for new stable version"), "stable", TRUE);
     ConfigDialog::addCheckBox(config, "ExtInfo", "ExtInfo", QT_TRANSLATE_NOOP("@default", "Check for new unstable version"), "unstable", FALSE);
+    ConfigDialog::addLineEdit(config, "ExtInfo", "ExtInfo", QT_TRANSLATE_NOOP("@default", "Mail program"), "mail_program", "thunderbird -remote \"mailto(%1)\" || thunderbird -compose \"to=%1\"");
     if (migrate)
         config->sync();
     ConfigDialog::connectSlot("ExtInfo","Import",SIGNAL(clicked()),this,SLOT(onImport()));
@@ -104,6 +108,7 @@ void KaduExtInfo::UnregisterInConfigDialog()
     ConfigDialog::disconnectSlot("ExtInfo","Import",SIGNAL(clicked()),this,SLOT(onImport()));
     ConfigDialog::disconnectSlot("ExtInfo","Export",SIGNAL(clicked()),this,SLOT(onExport()));
 
+    ConfigDialog::removeControl("ExtInfo","Mail program");
     ConfigDialog::removeControl("ExtInfo","Check for new unstable version");
     ConfigDialog::removeControl("ExtInfo","Check for new stable version");
     ConfigDialog::removeControl("ExtInfo","Show ext_info button in chat windows");
@@ -130,6 +135,7 @@ void KaduExtInfo::onApplyConfigDialog()
     showButton = config->readBoolEntry("ExtInfo","button",true);
     checkUpdateStable = config->readBoolEntry("ExtInfo","stable",true);
     checkUpdateUnstable = config->readBoolEntry("ExtInfo","unstable",false);
+    mailProgram = config->readEntry("ExtInfo","mail_program");
 
 #if defined(KADU_0_4_x)
     if (showButton)
@@ -154,23 +160,27 @@ void KaduExtInfo::RegisterSignals()
 #if defined(KADU_0_4_x)
     connect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
         this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
+    ConfigDialog::registerSlotOnApply(this, SLOT(onApplyConfigDialog()));
 #elif defined(KADU_0_5_0)
     connect(userlist, SIGNAL(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)),
         this, SLOT(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)));
+    ConfigDialog::registerSlotOnApplyTab("ExtInfo", this, SLOT(onApplyConfigDialog()));
+    //ConfigDialog::registerSlotOnApply(this, SLOT(onApplyConfigDialog()));
 #endif
-    ConfigDialog::registerSlotOnApply(this, SLOT(onApplyConfigDialog()));
     kdebugf2();
 }
 
 void KaduExtInfo::UnregisterSignals()
 {
     kdebugf();
-    ConfigDialog::unregisterSlotOnApply(this, SLOT(onApplyConfigDialog()));
     QObject::disconnect(UserBox::userboxmenu, SIGNAL(popup()), this, SLOT(onPopupMenuCreate()));
 #if defined(KADU_0_4_x)
+    ConfigDialog::unregisterSlotOnApply(this, SLOT(onApplyConfigDialog()));
     disconnect(&userlist, SIGNAL(userDataChanged(const UserListElement * const, const UserListElement * const,bool)),
         this, SLOT(userDataChanged(const UserListElement * const, const UserListElement * const,bool)));
 #elif defined(KADU_0_5_0)
+    ConfigDialog::unregisterSlotOnApplyTab("ExtInfo", this, SLOT(onApplyConfigDialog()));
+    //ConfigDialog::unregisterSlotOnApply(this, SLOT(onApplyConfigDialog()));
     disconnect(userlist, SIGNAL(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)),
         this, SLOT(userDataChanged(UserListElement, QString, QVariant,QVariant, bool, bool)));
 #endif
@@ -195,7 +205,7 @@ void KaduExtInfo::CreateChatButton()
     popups[1] = chatmenu->insertItem(icons_manager.loadIcon(this->moduleDataPath("ext_info_menu.png")),tr("Display extended information"),this,SLOT(showChatExtInfo()));
     connect(chat_manager, SIGNAL(chatCreated(const UinsList&)), this, SLOT(chatCreated(const UinsList&)));
     connect(chat_manager, SIGNAL(chatDestroying(const UinsList&)), this, SLOT(chatDestroying(const UinsList&)));
-    for ( it = chat_manager->chats().begin(); it != chat_manager->chats().end(); it++ )
+    for (ChatList::const_iterator it = chat_manager->chats().begin(); it != chat_manager->chats().end(); it++ )
         handleCreatedChat(*it);
 #endif
     kdebugf2();
@@ -297,13 +307,12 @@ void KaduExtInfo::Create5ChatButton()
     chatmenu = new QPopupMenu;
     popups[0] = chatmenu->insertItem(icons_manager->loadIcon("EditUserInfo"),tr("Display standard information"),this,SLOT(showChatUserInfo()));
     popups[1] = chatmenu->insertItem(icons_manager->loadIcon(this->moduleDataPath("ext_info_menu.png")),tr("Display extended information"),this,SLOT(showChatExtInfo()));
-    connect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
-    connect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
+    //connect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
+    //connect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
     Action *action = new Action(icons_manager->loadIcon(this->moduleDataPath("ext_info_menu.png")), tr("User Info"), "extinfo_button");
     connect(action, SIGNAL(activated(const UserGroup*, bool)), this, SLOT(onButtonAction(const UserGroup*, bool)));
     connect(action, SIGNAL(addedToToolbar(ToolButton *, ToolBar *, const UserListElements&)), this, SLOT(onAddedButton(ToolButton *, ToolBar *, const UserListElements&)));
     KaduActions.insert("extinfo_button", action);
-    ChatList::ConstIterator it;
 #endif
     kdebugf2();
 }
@@ -314,9 +323,10 @@ void KaduExtInfo::Destroy5ChatButton()
 #if defined(KADU_0_5_0)
     if (chatmenu == NULL)
         return;
-    disconnect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
-    disconnect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
-    KaduActions.remove("extinfo_button");
+    //disconnect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
+    //disconnect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
+    //disconnect(action, SIGNAL(activated(const UserGroup*, bool)), this, SLOT(onButtonAction(const UserGroup*, bool)));
+    //disconnect(action, SIGNAL(addedToToolbar(ToolButton *, ToolBar *, const UserListElements&)), this, SLOT(onAddedButton(ToolButton *, KaduActions.remove("extinfo_button");
     delete chatmenu;
     chatmenu = NULL;
 #endif
@@ -381,8 +391,69 @@ void KaduExtInfo::showRemindAnniversary(const QString &str, const QString &user)
 #endif
 }
 
-// Slots-----------------------------------------------------------------------------------------------------------
+void KaduExtInfo::openMailComposer(const QString &link)
+{
+    kdebugf();
+    QProcess *browser;
+    QStringList args;
+    QString mail = link;
 
+    QString mailComposer = mailProgram;
+    if (mailProgram.isEmpty())
+    {
+        /*QMessageBox::warning(0, qApp->translate("@default", QT_TR_NOOP("WWW error")),
+            qApp->translate("@default", QT_TR_NOOP("Web browser was not specified. Visit the configuration section")));*/
+        kdebugmf(KDEBUG_INFO, "Mail composer NOT specified.\n");
+        return;
+    }
+    if (!mailComposer.contains("%1"))
+        mailComposer.append(" \"%1\"");
+
+    mail.replace("mailto:","");
+    mailComposer.replace("%1", unicode2latinUrl(mail));
+
+    args=toStringList("sh", "-c", mailComposer);
+
+    CONST_FOREACH(i, args)
+        kdebugmf(KDEBUG_INFO, "%s\n", (*i).local8Bit().data());
+    browser = new QProcess(qApp);
+    browser->setArguments(args);
+    QObject::connect(browser, SIGNAL(processExited()), browser, SLOT(deleteLater()));
+
+    if (!browser->start())
+        QMessageBox::critical(0, tr("Mail error"), tr("Could not spawn Mail composer process. Check if the Mail program is functional"));
+
+    kdebugf2();
+}
+
+void KaduExtInfo::openChat(const QString &link)
+{
+    kdebugf();
+    QString uin = link;
+    uin.replace("gg://","");
+#if defined(KADU_0_4_x)
+    chat_manager->openChat(QVariant(uin).toUInt());
+#elif defined(KADU_0_5_0)
+    UserListElements ul;
+    ul.append(userlist->byID("Gadu",uin));
+    chat_manager->openChat("Gadu",ul);
+#endif
+    kdebugf2();
+}
+
+void KaduExtInfo::openSMS(const QString &link)
+{
+    kdebugf();
+    QString number = link;
+    number.replace("sms://","");
+    Sms *sms = new Sms("");
+    //sms->setRecipient(number);  <-- liczymy na poprawki w API modu³u SMS
+    sms->show();
+    kdebugf2();
+}
+
+// Slots-----------------------------------------------------------------------------------------------------------
+/*
 void KaduExtInfo::chatCreated(const UserGroup* ul)
 {
     kdebugf();
@@ -402,7 +473,7 @@ void KaduExtInfo::chatDestroying(const UserGroup* ul)
 #endif
     kdebugf2();
 }
-
+*/
 void KaduExtInfo::chatCreated(const UinsList& ul)
 {
     kdebugf();

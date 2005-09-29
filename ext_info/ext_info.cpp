@@ -14,12 +14,15 @@
     http://www.kadu.net/~dzwiedziu/ext_info.php
 
     TODO: 2.0
-            - Po klikniêciu na nr GG w oknie informacji ma siê otwieraæ okno rozmowy z nim
-            - Po klikniêciu na adres e-mail ma siê otwieraæ ustawiony program pocztowy
             - Stworzyæ osobny tab na informacje o programie, a przycisk "Informacje" wyrzuciæ
             - Porobiæ jakie¶ wskazówki dla u¿ytkownika
 
     ChangeLog:
+
+        [v2.0 beta 5]
+            + Po klikniêciu na nr GG w oknie informacji otwiera siê okno rozmowy z nim
+            + Po klikniêciu na adres e-mail otwiera siê ustawiony program pocztowy
+            * Dostosowanie do zmian w Kadu 0.5.0 SVN 2005-09-30
 
         [v2.0 beta 4]
             * Kilka drobnych poprawek

@@ -41,7 +41,14 @@ TextBrowser::~TextBrowser()
 
 void TextBrowser::onLinkClicked(const QString &link)
 {
-    OpenWebBrowser(link);
+    if (link.contains("mailto:"))
+        extinfo->openMailComposer(link);
+    else if (link.contains("gg:"))
+        extinfo->openChat(link);
+    else if (link.contains("sms:"))
+        extinfo->openSMS(link);
+    else
+        OpenWebBrowser(link);
 }
 
 void TextBrowser::setSource(const QString &)

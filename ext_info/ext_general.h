@@ -1,8 +1,8 @@
 #ifndef ext_generalH
 #define ext_generalH
 
-#define EXTINFO_VERSION "2.0 beta 4"
-#define EXTINFO_PACKED_VERSION "020000b04"
+#define EXTINFO_VERSION "2.0 beta 5"
+#define EXTINFO_PACKED_VERSION "020000b05"
 #define EXTINFO_INFOTEMPLATE "info_template_en.html"
 #define MODULE_EXTINFO_VERSION 2.0
 
@@ -26,6 +26,8 @@ class UserGroup;
 class ConfigFile;
 class UinsList;
 class HttpClient;
+class ToolButton;
+class UserListElements;
 
 class GetDataFromKadu
 {
@@ -71,8 +73,8 @@ private:
     void handleCreatedChat(Chat* chat);
     void handleDestroyingChat(Chat* chat);
     Chat* getCurrentChat();
+
     // Chat button w 0.5.0
-    //QValueList<ToolButton*> char5Buttons;
     void Create5ChatButton();
     void Destroy5ChatButton();
     void setShowChatButton(bool v);
@@ -89,6 +91,10 @@ public:
     virtual QString moduleDataPath(const QString &filename = "");
     virtual QString extinfoPath(const QString &filename = "");
 
+public slots:
+    void openMailComposer(const QString &link);
+    void openChat(const QString &link);
+    void openSMS(const QString &link);
 
 private slots:
     void onApplyConfigDialog();
@@ -100,8 +106,8 @@ private slots:
     void knowBirthday();
 
     // Chat button kod zapo¿yczony z modu³u XMMS
-    void chatCreated(const UserGroup*);     // Kadu 0.5.0
-    void chatDestroying(const UserGroup*);
+    //void chatCreated(const UserGroup*);     // Kadu 0.5.0
+    //void chatDestroying(const UserGroup*);
     void chatCreated(const UinsList&);      // Kadu 0.4.x
     void chatDestroying(const UinsList&);
     // 0.5.0

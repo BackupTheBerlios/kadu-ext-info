@@ -4,5 +4,5 @@ Description[pl]=Rozszerzone informacje o kontaktcie
 Author=D¼wiedziu
 Provides=exstension_description
 Conflicts=
-Dependencies=hints
-Version=2.0 beta 4
+Dependencies=hints sms
+Version=2.0 beta 5
