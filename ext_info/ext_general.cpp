@@ -42,6 +42,7 @@ KaduExtInfo::KaduExtInfo(bool migrate)
     }
     RegisterInConfigDialog(migrate);
     RegisterSignals();
+    Create5ChatButton();
     onApplyConfigDialog();
     if (checkUpdateStable || checkUpdateUnstable)
         checkForNewVersion();
@@ -57,6 +58,7 @@ KaduExtInfo::~KaduExtInfo()
         delete http;
     DestroyChatButton();
     UnregisterSignals();
+    Destroy5ChatButton();
     disconnect(&timer, SIGNAL(timeout()), this, SLOT(checkAnniversary()));
     closeWindow();
     UnregisterInConfigDialog();
@@ -129,6 +131,7 @@ void KaduExtInfo::onApplyConfigDialog()
     checkUpdateStable = config->readBoolEntry("ExtInfo","stable",true);
     checkUpdateUnstable = config->readBoolEntry("ExtInfo","unstable",false);
 
+#if defined(KADU_0_4_x)
     if (showButton)
     {
         if (chatmenu == NULL)
@@ -136,6 +139,9 @@ void KaduExtInfo::onApplyConfigDialog()
     }
     else
         DestroyChatButton();
+#elif defined(KADU_0_5_0)
+    setShowChatButton(showButton);
+#endif
     restartTimer();
 }
 
@@ -182,42 +188,33 @@ void KaduExtInfo::checkForNewVersion()
 void KaduExtInfo::CreateChatButton()
 {
     kdebugf();
+#if defined(KADU_0_4_x)
     chatmenu = new QPopupMenu;
 
-#if defined(KADU_0_4_x)
     popups[0] = chatmenu->insertItem(icons_manager.loadIcon("EditUserInfo"),tr("Display standard information"),this,SLOT(showChatUserInfo()));
     popups[1] = chatmenu->insertItem(icons_manager.loadIcon(this->moduleDataPath("ext_info_menu.png")),tr("Display extended information"),this,SLOT(showChatExtInfo()));
     connect(chat_manager, SIGNAL(chatCreated(const UinsList&)), this, SLOT(chatCreated(const UinsList&)));
     connect(chat_manager, SIGNAL(chatDestroying(const UinsList&)), this, SLOT(chatDestroying(const UinsList&)));
-#elif defined(KADU_0_5_0)
-    popups[0] = chatmenu->insertItem(icons_manager->loadIcon("EditUserInfo"),tr("Display standard information"),this,SLOT(showChatUserInfo()));
-    popups[1] = chatmenu->insertItem(icons_manager->loadIcon(this->moduleDataPath("ext_info_menu.png")),tr("Display extended information"),this,SLOT(showChatExtInfo()));
-    connect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
-    connect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
-#endif
-    ChatList::ConstIterator it;
     for ( it = chat_manager->chats().begin(); it != chat_manager->chats().end(); it++ )
         handleCreatedChat(*it);
+#endif
     kdebugf2();
 }
 
 void KaduExtInfo::DestroyChatButton()
 {
-    if (chatmenu == NULL)
-        return;
     kdebugf();
 #if defined(KADU_0_4_x)
+    if (chatmenu == NULL)
+        return;
     disconnect(chat_manager, SIGNAL(chatCreated(const UinsList&)), this, SLOT(chatCreated(const UinsList&)));
     disconnect(chat_manager, SIGNAL(chatDestroying(const UinsList&)), this, SLOT(chatDestroying(const UinsList&)));
-#elif defined(KADU_0_5_0)
-    disconnect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
-    disconnect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
-#endif
     ChatList::ConstIterator it;
     for ( it = chat_manager->chats().begin(); it != chat_manager->chats().end(); it++ )
         handleDestroyingChat(*it);
     delete chatmenu;
     chatmenu = NULL;
+#endif
     kdebugf2();
 }
 
@@ -230,30 +227,40 @@ void KaduExtInfo::handleCreatedChat(Chat* chat)
     if (chat->users()->count() != 1)
 #endif
         return;
-    QPushButton* chatbutton = new QPushButton(chat->buttontray);
 #if defined(KADU_0_4_x)
-    chatbutton->setPixmap(icons_manager.loadIcon("PersonalInfo"));
-#elif defined(KADU_0_5_0)
-    chatbutton->setPixmap(icons_manager->loadIcon("PersonalInfo"));
-#endif
+    QPushButton* chatbutton = new QPushButton(chat->buttontray);
+    chatbutton->setPixmap(icons_manager.loadIcon(this->moduleDataPath("ext_info_menu.png")));
     chatbutton->setPopup(chatmenu);
     chatbutton->show();
-    QToolTip::add(chatbutton, "User Info");
+    QToolTip::add(chatbutton, tr("User Info"));
     chatButtons[chat] = chatbutton;
+#elif defined(KADU_0_5_0)
+    //chatbutton->setPixmap(icons_manager->loadIcon("PersonalInfo"));
+    /*QValueList<ToolButton*> buttons = KaduActions["extinfo_button"]->toolButtonsForUserListElements(chat->users()->toUserListElements());
+    for (QValueList<ToolButton*>::iterator i = buttons.begin(); i != buttons.end(); i++)
+    {
+        QToolTip::remove(*i);
+        (*i)->setPixmap(icons_manager->loadIcon("PersonalInfo"));
+        (*i)->setPopup(chatmenu);
+        //(*i).show();
+        QToolTip::add(*i, "User Info");*/
+        //(*i)
+    //}
+#endif
     kdebugf2();
 }
 
 void KaduExtInfo::handleDestroyingChat(Chat* chat)
 {
     kdebugf();
-//#if defined(KADU_0_5_0)
+#if defined(KADU_0_4_x)
 
     if (!chatButtons.contains(chat))
             return;
 
     delete chatButtons[chat];
     chatButtons.remove(chat);
-//#endif
+#endif
     kdebugf2();
 }
 
@@ -281,6 +288,59 @@ Chat* KaduExtInfo::getCurrentChat()
     return cs[i];
 //#endif
     return NULL;
+}
+
+void KaduExtInfo::Create5ChatButton()
+{
+    kdebugf();
+#if defined(KADU_0_5_0)
+    chatmenu = new QPopupMenu;
+    popups[0] = chatmenu->insertItem(icons_manager->loadIcon("EditUserInfo"),tr("Display standard information"),this,SLOT(showChatUserInfo()));
+    popups[1] = chatmenu->insertItem(icons_manager->loadIcon(this->moduleDataPath("ext_info_menu.png")),tr("Display extended information"),this,SLOT(showChatExtInfo()));
+    connect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
+    connect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
+    Action *action = new Action(icons_manager->loadIcon(this->moduleDataPath("ext_info_menu.png")), tr("User Info"), "extinfo_button");
+    connect(action, SIGNAL(activated(const UserGroup*, bool)), this, SLOT(onButtonAction(const UserGroup*, bool)));
+    connect(action, SIGNAL(addedToToolbar(ToolButton *, ToolBar *, const UserListElements&)), this, SLOT(onAddedButton(ToolButton *, ToolBar *, const UserListElements&)));
+    KaduActions.insert("extinfo_button", action);
+    ChatList::ConstIterator it;
+#endif
+    kdebugf2();
+}
+
+void KaduExtInfo::Destroy5ChatButton()
+{
+    kdebugf();
+#if defined(KADU_0_5_0)
+    if (chatmenu == NULL)
+        return;
+    disconnect(chat_manager, SIGNAL(chatCreated(const UserGroup*)), this, SLOT(chatCreated(const UserGroup*)));
+    disconnect(chat_manager, SIGNAL(chatDestroying(const UserGroup*)), this, SLOT(chatDestroying(const UserGroup*)));
+    KaduActions.remove("extinfo_button");
+    delete chatmenu;
+    chatmenu = NULL;
+#endif
+    kdebugf2();
+}
+
+void KaduExtInfo::setShowChatButton(bool v)
+{
+    kdebugf();
+#if defined(KADU_0_5_0)
+    ChatList cs = chat_manager->chats();
+    for (uint i = 0; i < cs.count(); i++)
+    {
+        UserListElements u = cs[i]->users()->toUserListElements();
+        if (u.count() > 1)
+            continue;
+        QValueList<ToolButton*> buttons = KaduActions["extinfo_button"]->toolButtonsForUserListElements(u);
+        for (QValueList<ToolButton*>::iterator i = buttons.begin(); i != buttons.end(); i++)
+        {
+            (*i)->setShown(v);
+        }
+    }
+#endif
+    kdebugf2();
 }
 
 bool KaduExtInfo::getSelectedUser(QString &user)
@@ -385,6 +445,26 @@ void KaduExtInfo::showChatExtInfo()
 #elif defined(KADU_0_5_0)
     UserListElements s = chat->users()->toUserListElements();
     showExtInfo(s[0].altNick());
+#endif
+    kdebugf2();
+}
+
+void KaduExtInfo::onButtonAction(const UserGroup* users, bool is_on)
+{
+    kdebugf();
+#if defined(KADU_0_5_0)
+    showExtInfo((users->toUserListElements())[0].altNick());
+#endif
+    kdebugf2();
+}
+
+void KaduExtInfo::onAddedButton(ToolButton *button, ToolBar *toolbar, const UserListElements& users)
+{
+    kdebugf();
+#if defined(KADU_0_5_0)
+    if (!showButton || (users.count() > 1))
+        button->hide();
+    button->setPopup(chatmenu);
 #endif
     kdebugf2();
 }

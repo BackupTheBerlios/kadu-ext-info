@@ -997,7 +997,10 @@ void frmExtInfo::clickedAvatar()
     QString n = encodeName(currentSection) + QString(".jpg");
     frmAvatar frmavatar(extinfo->extinfoPath(n), getPhotoPath(), this);
     if (frmavatar.exec() == QDialog::Accepted)
+    {
+        cbScaled->setChecked(false);
         loadImage(n);
+    }
 }
 
 void frmExtInfo::checkScaledImage(int scaled)

@@ -1,8 +1,8 @@
 #ifndef ext_generalH
 #define ext_generalH
 
-#define EXTINFO_VERSION "2.0 beta 3"
-#define EXTINFO_PACKED_VERSION "020000b03"
+#define EXTINFO_VERSION "2.0 beta 4"
+#define EXTINFO_PACKED_VERSION "020000b04"
 #define EXTINFO_INFOTEMPLATE "info_template_en.html"
 #define MODULE_EXTINFO_VERSION 2.0
 
@@ -51,7 +51,6 @@ private:
     // Chat Button
     QPopupMenu *chatmenu;   // Menu pojawiajace sie po klikniecu w przycisk ext_info w oknie rozmowy
     int popups[2];
-    QMap<Chat*,QPushButton*> chatButtons;
     // Check for new version
     HttpClient *http;
 
@@ -65,12 +64,19 @@ private:
     void RegisterSignals();
     void UnregisterSignals();
 
-    // Chat button
+    // Chat button w 0.4.x
+    QMap<Chat*,QPushButton*> chatButtons;
     void CreateChatButton();
     void DestroyChatButton();
     void handleCreatedChat(Chat* chat);
     void handleDestroyingChat(Chat* chat);
     Chat* getCurrentChat();
+    // Chat button w 0.5.0
+    //QValueList<ToolButton*> char5Buttons;
+    void Create5ChatButton();
+    void Destroy5ChatButton();
+    void setShowChatButton(bool v);
+
     //
     void checkForNewVersion();
 
@@ -98,6 +104,10 @@ private slots:
     void chatDestroying(const UserGroup*);
     void chatCreated(const UinsList&);      // Kadu 0.4.x
     void chatDestroying(const UinsList&);
+    // 0.5.0
+    void onButtonAction(const UserGroup* users, bool is_on);
+    void onAddedButton(ToolButton *button, ToolBar *toolbar, const UserListElements& users);
+
     void showChatUserInfo();
     void showChatExtInfo();
 

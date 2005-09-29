@@ -91,6 +91,7 @@ frmAvatar::frmAvatar(const QString &filename,const QString &photo, QWidget* pare
     //pbSave = new QPushButton( frameSettings, "pbSave" );
     //layoutSettings->addWidget( pbSave );
     pbOk = new QPushButton(frameSettings, "pbOk");
+    pbOk->setDefault(TRUE);
     layoutSettings->addWidget(pbOk);
 
     pbCancel = new QPushButton(frameSettings, "pbCancel");

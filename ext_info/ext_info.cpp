@@ -21,6 +21,10 @@
 
     ChangeLog:
 
+        [v2.0 beta 4]
+            * Kilka drobnych poprawek
+            * Dostosowanie do zmian w Kadu 0.5.0 SVN 2005-09-27
+
         [v2.0 beta 3]
             * Poprawki w podgl±dzie zdjêcia i oknie edycji avataru.
             * Przeniesienie kontrolki woboru sekcji poza zak³adki
